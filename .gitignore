@@ -1,0 +1,14 @@
+# Environnement virtuel
+.venv/
+venv/
+
+# Fichiers temporaires Python
+__pycache__/
+*.py[cod]
+
+# Tests
+.pytest_cache/
+
+# Configuration locale
+.vscode/
+.env
