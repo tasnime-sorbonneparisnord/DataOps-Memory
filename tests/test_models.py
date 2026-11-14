@@ -74,9 +74,13 @@ def test_critical_removes_ten_seconds():
     assert critical.effect.seconds_delta == -10
 
 
-def test_card_effect_rejects_zero():
+def test_zero_effect_means_no_effect():
+    assert not CardEffect(0).has_effect()
+
+
+def test_special_card_rejects_zero_seconds():
     with pytest.raises(ValueError):
-        CardEffect(0)
+        CoffeeCard("SP003", seconds=0)
 
 
 # INCIDENT PAIR TESTS

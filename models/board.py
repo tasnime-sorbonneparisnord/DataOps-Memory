@@ -37,9 +37,9 @@ class Board:
 
         self.cards.append(card)
 
-    def shuffle(self):
-        """Randomly shuffles the cards."""
-        random.shuffle(self.cards)
+    def shuffle(self, rng: random.Random = None):
+        """Randomly shuffles the cards (pass a seeded rng for reproducible tests)."""
+        (rng or random).shuffle(self.cards)
 
     def get_card(self, card_id: str) -> Card:
         """Returns a card using its ID."""
@@ -48,6 +48,16 @@ class Board:
                 return card
 
         raise KeyError(f"No card found with ID: {card_id}")
+
+    def get_card_at(self, index: int) -> Card:
+        """Returns the card at a grid position (0 = top-left, row by row)."""
+        if not isinstance(index, int) or isinstance(index, bool):
+            raise TypeError("The position must be an integer.")
+
+        if not 0 <= index < len(self.cards):
+            raise IndexError(f"Invalid card position: {index}")
+
+        return self.cards[index]
 
     def get_cards(self) -> tuple:
         """Returns all cards on the board."""
@@ -65,6 +75,13 @@ class Board:
         return tuple(
             card for card in self.cards
             if isinstance(card, SpecialCard)
+        )
+
+    def resolved_count(self) -> int:
+        """Returns the number of incidents already resolved."""
+        return sum(
+            1 for card in self.get_pair_cards()
+            if card.is_matched() and card.get_pair_role() == "incident"
         )
 
     def is_complete(self) -> bool:

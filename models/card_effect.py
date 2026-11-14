@@ -1,37 +1,32 @@
 
-from dataclasses import dataclass
-
 from models.card import Card
+from models.effect import CardEffect, DEFAULT_EFFECT_SECONDS, NO_EFFECT
 
-
-@dataclass(frozen=True)
-class CardEffect:
-    """Describes the time effect of a special card."""
-
-    seconds_delta: int
-
-    def __post_init__(self):
-        if not isinstance(self.seconds_delta, int) or isinstance(
-            self.seconds_delta, bool
-        ):
-            raise TypeError("seconds_delta must be an integer.")
-
-        if self.seconds_delta == 0:
-            raise ValueError("An effect cannot have zero seconds.")
-
-    def get_description(self) -> str:
-        """Returns a readable description of the effect."""
-        if self.seconds_delta > 0:
-            return f"Adds {self.seconds_delta} seconds."
-
-        return f"Removes {abs(self.seconds_delta)} seconds."
+__all__ = [
+    "CardEffect",
+    "DEFAULT_EFFECT_SECONDS",
+    "NO_EFFECT",
+    "SpecialCard",
+    "CoffeeCard",
+    "CriticalCard",
+]
 
 
 class SpecialCard(Card):
     """Base class for special cards."""
 
-    def __init__(self, card_id: str, title: str, effect: CardEffect):
-        super().__init__(card_id)
+    def __init__(
+        self,
+        card_id: str,
+        title: str,
+        effect: CardEffect,
+        icon: str = ""
+    ):
+        super().__init__(card_id, icon)
+
+        if not effect.has_effect():
+            raise ValueError("A special card must change the timer.")
+
         self.title = title
         self.effect = effect
 
@@ -39,18 +34,32 @@ class SpecialCard(Card):
     def label(self) -> str:
         return self.title
 
+    def activate(self) -> CardEffect:
+        """Returns the time effect of the card (polymorphism)."""
+        return self.effect
+
+    def is_special(self) -> bool:
+        return True
+
 
 class CoffeeCard(SpecialCard):
-    """Special card that adds 10 seconds."""
+    """Special card that adds time to the countdown."""
 
-    def __init__(self, card_id: str):
-        effect = CardEffect(seconds_delta=10)
-        super().__init__(card_id, "Coffee", effect)
+    def __init__(self, card_id: str, seconds: int = DEFAULT_EFFECT_SECONDS):
+        _check_positive(seconds)
+        effect = CardEffect(seconds_delta=seconds)
+        super().__init__(card_id, "Café", effect, icon="coffee.png")
 
 
 class CriticalCard(SpecialCard):
-    """Special card that removes 10 seconds."""
+    """Special card that removes time from the countdown."""
 
-    def __init__(self, card_id: str):
-        effect = CardEffect(seconds_delta=-10)
-        super().__init__(card_id, "Critical", effect)
+    def __init__(self, card_id: str, seconds: int = DEFAULT_EFFECT_SECONDS):
+        _check_positive(seconds)
+        effect = CardEffect(seconds_delta=-seconds)
+        super().__init__(card_id, "Critique", effect, icon="critical.png")
+
+
+def _check_positive(seconds: int):
+    if not isinstance(seconds, int) or isinstance(seconds, bool) or seconds <= 0:
+        raise ValueError("Effect seconds must be a positive integer.")
