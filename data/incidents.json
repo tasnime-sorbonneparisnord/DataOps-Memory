@@ -1,0 +1,218 @@
+[
+  {
+    "pair_id": "DB-01",
+    "theme": "database",
+    "incident": "Disque plein",
+    "solution": "Purger les vieux logs",
+    "explanation": "Les logs s'accumulent et remplissent le disque : on archive ou supprime les plus anciens.",
+    "incident_icon": "database_incident.png",
+    "solution_icon": "database_solution.png"
+  },
+  {
+    "pair_id": "DB-02",
+    "theme": "database",
+    "incident": "Base indisponible",
+    "solution": "Redémarrer le service",
+    "explanation": "Un service de base de données planté se relance avant d'analyser la cause.",
+    "incident_icon": "database_incident.png",
+    "solution_icon": "database_solution.png"
+  },
+  {
+    "pair_id": "DB-03",
+    "theme": "database",
+    "incident": "Requête trop lente",
+    "solution": "Ajouter un index",
+    "explanation": "Un index évite de parcourir toute la table à chaque requête.",
+    "incident_icon": "database_incident.png",
+    "solution_icon": "database_solution.png"
+  },
+  {
+    "pair_id": "DB-04",
+    "theme": "database",
+    "incident": "Données corrompues",
+    "solution": "Restaurer la sauvegarde",
+    "explanation": "Une sauvegarde récente permet de revenir à un état sain.",
+    "incident_icon": "database_incident.png",
+    "solution_icon": "database_solution.png"
+  },
+  {
+    "pair_id": "DB-05",
+    "theme": "database",
+    "incident": "Trop de connexions",
+    "solution": "Pool de connexions",
+    "explanation": "Un pool réutilise un nombre limité de connexions au lieu d'en ouvrir sans fin.",
+    "incident_icon": "database_incident.png",
+    "solution_icon": "database_solution.png"
+  },
+  {
+    "pair_id": "DB-06",
+    "theme": "database",
+    "incident": "Doublons en table",
+    "solution": "Contrainte d'unicité",
+    "explanation": "Une contrainte UNIQUE empêche d'insérer deux fois la même ligne.",
+    "incident_icon": "database_incident.png",
+    "solution_icon": "database_solution.png"
+  },
+  {
+    "pair_id": "NET-01",
+    "theme": "network",
+    "incident": "Site injoignable",
+    "solution": "Vérifier le DNS",
+    "explanation": "Si le nom de domaine ne se résout plus, le site semble hors ligne.",
+    "incident_icon": "network_incident.png",
+    "solution_icon": "network_solution.png"
+  },
+  {
+    "pair_id": "NET-02",
+    "theme": "network",
+    "incident": "Latence élevée",
+    "solution": "Activer un CDN",
+    "explanation": "Un CDN sert le contenu depuis un serveur proche de l'utilisateur.",
+    "incident_icon": "network_incident.png",
+    "solution_icon": "network_solution.png"
+  },
+  {
+    "pair_id": "NET-03",
+    "theme": "network",
+    "incident": "Port bloqué",
+    "solution": "Ouvrir le pare-feu",
+    "explanation": "Une règle de pare-feu doit autoriser le port utilisé par le service.",
+    "incident_icon": "network_incident.png",
+    "solution_icon": "network_solution.png"
+  },
+  {
+    "pair_id": "NET-04",
+    "theme": "network",
+    "incident": "Certificat expiré",
+    "solution": "Renouveler le certificat",
+    "explanation": "Un certificat TLS expiré bloque les connexions HTTPS sécurisées.",
+    "incident_icon": "network_incident.png",
+    "solution_icon": "network_solution.png"
+  },
+  {
+    "pair_id": "NET-05",
+    "theme": "network",
+    "incident": "Attaque DDoS",
+    "solution": "Limiter le débit",
+    "explanation": "Le rate limiting filtre l'avalanche de requêtes malveillantes.",
+    "incident_icon": "network_incident.png",
+    "solution_icon": "network_solution.png"
+  },
+  {
+    "pair_id": "NET-06",
+    "theme": "network",
+    "incident": "Paquets perdus",
+    "solution": "Changer le câble",
+    "explanation": "Un câble ou un port défectueux fait perdre des paquets réseau.",
+    "incident_icon": "network_incident.png",
+    "solution_icon": "network_solution.png"
+  },
+  {
+    "pair_id": "CLD-01",
+    "theme": "cloud",
+    "incident": "Serveur saturé",
+    "solution": "Ajouter des instances",
+    "explanation": "La mise à l'échelle horizontale répartit la charge sur plusieurs machines.",
+    "incident_icon": "cloud_incident.png",
+    "solution_icon": "cloud_solution.png"
+  },
+  {
+    "pair_id": "CLD-02",
+    "theme": "cloud",
+    "incident": "Facture explosive",
+    "solution": "Éteindre ressources inutilisées",
+    "explanation": "Des machines oubliées allumées coûtent cher sans rien produire.",
+    "incident_icon": "cloud_incident.png",
+    "solution_icon": "cloud_solution.png"
+  },
+  {
+    "pair_id": "CLD-03",
+    "theme": "cloud",
+    "incident": "Conteneur en boucle",
+    "solution": "Lire les logs",
+    "explanation": "Un conteneur qui redémarre sans cesse explique souvent l'erreur dans ses logs.",
+    "incident_icon": "cloud_incident.png",
+    "solution_icon": "cloud_solution.png"
+  },
+  {
+    "pair_id": "CLD-04",
+    "theme": "cloud",
+    "incident": "Clé API exposée",
+    "solution": "Révoquer la clé",
+    "explanation": "Une clé publiée doit être révoquée puis remplacée immédiatement.",
+    "incident_icon": "cloud_incident.png",
+    "solution_icon": "cloud_solution.png"
+  },
+  {
+    "pair_id": "CLD-05",
+    "theme": "cloud",
+    "incident": "Mémoire saturée",
+    "solution": "Augmenter la RAM",
+    "explanation": "Un service à court de mémoire est tué : il faut lui allouer plus de RAM.",
+    "incident_icon": "cloud_incident.png",
+    "solution_icon": "cloud_solution.png"
+  },
+  {
+    "pair_id": "CLD-06",
+    "theme": "cloud",
+    "incident": "Région en panne",
+    "solution": "Basculer de région",
+    "explanation": "Une architecture multi-région permet de reprendre ailleurs en cas de panne.",
+    "incident_icon": "cloud_incident.png",
+    "solution_icon": "cloud_solution.png"
+  },
+  {
+    "pair_id": "PIP-01",
+    "theme": "pipeline",
+    "incident": "Job ETL échoué",
+    "solution": "Relancer le job",
+    "explanation": "Après correction de la cause, on relance le job pour recharger les données.",
+    "incident_icon": "pipeline_incident.png",
+    "solution_icon": "pipeline_solution.png"
+  },
+  {
+    "pair_id": "PIP-02",
+    "theme": "pipeline",
+    "incident": "Schéma modifié",
+    "solution": "Adapter le mapping",
+    "explanation": "Une colonne renommée à la source casse le pipeline tant que le mapping n'est pas adapté.",
+    "incident_icon": "pipeline_incident.png",
+    "solution_icon": "pipeline_solution.png"
+  },
+  {
+    "pair_id": "PIP-03",
+    "theme": "pipeline",
+    "incident": "Valeurs manquantes",
+    "solution": "Règles de validation",
+    "explanation": "Des contrôles de qualité détectent les champs vides avant le chargement.",
+    "incident_icon": "pipeline_incident.png",
+    "solution_icon": "pipeline_solution.png"
+  },
+  {
+    "pair_id": "PIP-04",
+    "theme": "pipeline",
+    "incident": "Pipeline trop lent",
+    "solution": "Paralléliser les tâches",
+    "explanation": "Traiter les partitions en parallèle réduit la durée totale.",
+    "incident_icon": "pipeline_incident.png",
+    "solution_icon": "pipeline_solution.png"
+  },
+  {
+    "pair_id": "PIP-05",
+    "theme": "pipeline",
+    "incident": "Données en retard",
+    "solution": "Alerter l'équipe",
+    "explanation": "Une alerte de fraîcheur prévient quand les données n'arrivent pas à l'heure.",
+    "incident_icon": "pipeline_incident.png",
+    "solution_icon": "pipeline_solution.png"
+  },
+  {
+    "pair_id": "PIP-06",
+    "theme": "pipeline",
+    "incident": "Fichier source absent",
+    "solution": "Vérifier l'ingestion",
+    "explanation": "Si le fichier n'est pas déposé, l'étape d'ingestion amont est en cause.",
+    "incident_icon": "pipeline_incident.png",
+    "solution_icon": "pipeline_solution.png"
+  }
+]

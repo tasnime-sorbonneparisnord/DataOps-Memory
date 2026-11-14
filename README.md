@@ -39,21 +39,22 @@ Tasks completed:
 
 **Status:** Completed. All 16 unit tests pass successfully.
 
-### Stage 2 – Game Logic Development (Khoubeib)
+### Stage 2 – Game Logic and Data (Khoubeib)
 
-This stage focuses on implementing the game mechanics and rules.
+This stage implements the rules of the game, independently of Pygame.
 
-Planned tasks:
+Tasks completed:
 
-- Develop the `MemoryGame` class.
-- Implement the game flow and player interactions.
-- Manage the countdown timer.
-- Integrate the effects of special cards.
-- Implement the scoring system.
-- Manage win and lose conditions.
-- Integrate the models developed in Stage 1.
+- **`MemoryGame`:** card selection, incident/solution matching, special cards, attempts, victory, defeat and restart.
+- **`CountdownTimer`:** countdown driven from outside (`update(delta)`), never below zero, bonus and penalty.
+- **`LevelConfig` / `LEVELS`:** level parameters in one configuration (no hard-coded values).
+- **`GameResult`:** result of a game and the single score comparison rule.
+- **`IncidentLibrary`:** loads and validates `data/incidents.json` (24 pairs, 4 themes) and draws random pairs.
+- **`ScoreRepository`:** best score per level in `data/best_scores.json` (missing or corrupted file = no record, no crash).
+- **`console_demo.py`:** text version of the game to play the logic without the graphical interface.
+- **Unit tests:** rules, timer, levels, scores, content file and a full game with a fixed seed.
 
-**Status:** To be developed.
+**Status:** Completed. Interface for the UI described in `docs/logique_metier.md`.
 
 ### Stage 3 – Graphical User Interface (Vanilla)
 
@@ -87,14 +88,34 @@ DataOps-Memory/
 ├── models/
 │   ├── __init__.py
 │   ├── card.py
+│   ├── effect.py
 │   ├── card_effect.py
 │   ├── incident_pair.py
 │   └── board.py
 │
-├── tests/
-│   ├── __init__.py
-│   └── test_models.py
+├── game/
+│   ├── enums.py            Difficulty, GameState, SelectionOutcome
+│   ├── levels.py           LevelConfig + LEVELS
+│   ├── countdown_timer.py
+│   ├── game_result.py
+│   ├── board_builder.py
+│   └── memory_game.py
 │
+├── storage/
+│   ├── incident_library.py
+│   └── score_repository.py
+│
+├── data/
+│   └── incidents.json
+│
+├── tests/
+│   ├── conftest.py
+│   ├── test_models.py
+│   ├── test_memory_game.py
+│   └── test_game_logic_parts.py
+│
+├── console_demo.py
+├── requirements.txt
 ├── main.py
 ├── README.md
 └── .gitignore
@@ -121,13 +142,19 @@ python -m venv .venv
 ### Install Dependencies
 
 ```bash
-python -m pip install pytest
+python -m pip install -r requirements.txt
 ```
 
 ### Run Unit Tests
 
 ```bash
 python -m pytest -v
+```
+
+### Play the Console Version (without Pygame)
+
+```bash
+python console_demo.py
 ```
 
 ## 7. Project Objectives

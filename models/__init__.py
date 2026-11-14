@@ -9,6 +9,7 @@ from models.card import (
 
 from models.card_effect import (
     CardEffect,
+    NO_EFFECT,
     SpecialCard,
     CoffeeCard,
     CriticalCard,
@@ -25,6 +26,7 @@ __all__ = [
     "IncidentCard",
     "SolutionCard",
     "CardEffect",
+    "NO_EFFECT",
     "SpecialCard",
     "CoffeeCard",
     "CriticalCard",

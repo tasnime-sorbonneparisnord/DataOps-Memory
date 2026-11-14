@@ -12,3 +12,5 @@ __pycache__/
 # Configuration locale
 .vscode/
 .env
+# Scores locaux
+data/best_scores.json
