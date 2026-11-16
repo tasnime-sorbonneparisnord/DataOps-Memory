@@ -9,9 +9,9 @@ from ui.button import Button
 from ui.card_renderer import CardRenderer
 from ui.drawing import draw_database_icon, draw_panel, draw_text, wrap_text
 from ui.grid_layout import GridLayout
-from ui.settings import (COLORS, GRID_AREA_WIDTH, HEADER_HEIGHT, MARGIN, MESSAGE_DURATION,
-                         MISMATCH_DELAY, SIDE_PANEL_WIDTH, SPECIAL_FLASH_DURATION, THEME_NAMES,
-                         WINDOW_HEIGHT, WINDOW_WIDTH)
+from ui.settings import (COLORS, END_DELAY, GRID_AREA_WIDTH, HEADER_HEIGHT, MARGIN,
+                         MESSAGE_DURATION, MISMATCH_DELAY, SIDE_PANEL_WIDTH,
+                         SPECIAL_FLASH_DURATION, THEME_NAMES, WINDOW_HEIGHT, WINDOW_WIDTH)
 from ui.screens.base import Screen
 
 HUD_BOX_WIDTH, HUD_BOX_HEIGHT, HUD_GAP = 200, 74, 16
@@ -46,6 +46,7 @@ class GameScreen(Screen):
 
         
         self._mismatch_timer = None
+        self._end_timer = None       
         self._flashing = {}          # numéro de carte -> temps d'affichage restant
         self._message = None         # (texte, couleur, temps restant)
         self._reactions = {
@@ -102,6 +103,7 @@ class GameScreen(Screen):
         self._update_mismatch(delta_seconds)
         self._update_flashing(delta_seconds)
         self._update_message(delta_seconds)
+        self._update_end(delta_seconds)
 
     def _update_mismatch(self, delta_seconds):
         if self._mismatch_timer is None:
@@ -121,7 +123,17 @@ class GameScreen(Screen):
         if self._message:
             text, color, remaining = self._message
             remaining -= delta_seconds
-            self._message = (text, color, remaining) if remaining > 0 else None          
+            self._message = (text, color, remaining) if remaining > 0 else None   
+
+
+    def _update_end(self, delta_seconds):
+        if not self.game.is_over():
+            return
+        if self._end_timer is None:
+            self._end_timer = END_DELAY
+        self._end_timer -= delta_seconds
+        if self._end_timer <= 0:
+            self.app.show_end(self.game.result())                   
 
     # ------------------------------------------------------------------
     # Dessin
