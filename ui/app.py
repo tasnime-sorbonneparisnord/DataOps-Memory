@@ -4,6 +4,8 @@ import pygame
 
 from game.memory_game import MemoryGame
 from ui.drawing import FontBook, draw_vertical_gradient
+from ui.icons import IconLoader
+from ui.screens.game_screen import GameScreen
 from ui.screens.menu_screen import MenuScreen
 from ui.settings import (COLORS, FPS, MENU_BACKGROUND_FILE, WINDOW_HEIGHT, WINDOW_TITLE,
                          WINDOW_WIDTH)
@@ -27,6 +29,7 @@ class App:
         self.scores = scores
         self.game = MemoryGame(library)
         self.fonts = FontBook()
+        self.icons = IconLoader()
         self.background = self._create_background()
         self.menu_background = self._load_menu_background()
 
@@ -44,7 +47,8 @@ class App:
         print("Écran des règles : à venir")
 
     def start_game(self, difficulty):
-        print(f"Lancement d'une partie : {difficulty.name} (écran de jeu à venir)")
+        self.game.start(difficulty)
+        self._current = GameScreen(self)
 
     def quit(self):
         self._running = False
