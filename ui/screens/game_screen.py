@@ -4,12 +4,13 @@ import math
 
 import pygame
 
+from game.enums import SelectionOutcome
 from ui.button import Button
 from ui.card_renderer import CardRenderer
 from ui.drawing import draw_database_icon, draw_panel, draw_text, wrap_text
 from ui.grid_layout import GridLayout
-from ui.settings import (COLORS, GRID_AREA_WIDTH, HEADER_HEIGHT, MARGIN, SIDE_PANEL_WIDTH,
-                         THEME_NAMES, WINDOW_HEIGHT, WINDOW_WIDTH)
+from ui.settings import (COLORS, GRID_AREA_WIDTH, HEADER_HEIGHT, MARGIN, MISMATCH_DELAY,
+                         SIDE_PANEL_WIDTH, THEME_NAMES, WINDOW_HEIGHT, WINDOW_WIDTH)
 from ui.screens.base import Screen
 
 HUD_BOX_WIDTH, HUD_BOX_HEIGHT, HUD_GAP = 200, 74, 16
@@ -42,6 +43,12 @@ class GameScreen(Screen):
         self._menu_button = Button((self._panel.left + 20, self._panel.bottom - 76,
                                     self._panel.width - 40, 56), "Retour au menu", primary=False)
 
+        
+        self._mismatch_timer = None
+        self._reactions = {
+            SelectionOutcome.MISMATCH: self._on_mismatch,
+        }
+
     # ------------------------------------------------------------------
     # Événements
     # ------------------------------------------------------------------
@@ -51,6 +58,20 @@ class GameScreen(Screen):
             self.app.show_menu()
         elif self._menu_button.is_clicked(event):
             self.app.show_menu()
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            self._on_click(event.pos)
+
+    def _on_click(self, position):
+        index = self._layout.index_at(position)
+        if index is None or self.game.is_over():
+            return
+        outcome = self.game.select_card(index)
+        reaction = self._reactions.get(outcome)
+        if reaction:
+            reaction(index)
+
+    def _on_mismatch(self, index):
+        self._mismatch_timer = MISMATCH_DELAY
 
     # ------------------------------------------------------------------
     # Temps
@@ -58,6 +79,15 @@ class GameScreen(Screen):
 
     def update(self, delta_seconds: float):
         self.game.update(delta_seconds)
+        self._update_mismatch(delta_seconds)
+
+    def _update_mismatch(self, delta_seconds):
+        if self._mismatch_timer is None:
+            return
+        self._mismatch_timer -= delta_seconds
+        if self._mismatch_timer <= 0:
+            self.game.resolve_mismatch()
+            self._mismatch_timer = None
 
     # ------------------------------------------------------------------
     # Dessin
