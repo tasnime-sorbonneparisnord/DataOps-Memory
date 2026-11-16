@@ -3,28 +3,23 @@
 Lancement :  python main.py
 """
 
-import pygame
+import sys
 
-from ui.settings import COLORS, FPS, WINDOW_HEIGHT, WINDOW_TITLE, WINDOW_WIDTH
+from storage.incident_library import IncidentLibrary, IncidentLibraryError
+from storage.score_repository import ScoreRepository
+from ui.app import App
+from ui.settings import INCIDENTS_FILE, SCORES_FILE
 
 
 def main():
-    pygame.init()
-    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    pygame.display.set_caption(WINDOW_TITLE)
-    clock = pygame.time.Clock()
+    try:
+        library = IncidentLibrary.from_json(INCIDENTS_FILE)
+    except IncidentLibraryError as error:
+        print(f"Impossible de lancer le jeu : {error}")
+        sys.exit(1)
 
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-
-        screen.fill(COLORS["background_top"])
-        pygame.display.flip()
-        clock.tick(FPS)
-
-    pygame.quit()
+    scores = ScoreRepository(SCORES_FILE)
+    App(library, scores).run()
 
 
 if __name__ == "__main__":
