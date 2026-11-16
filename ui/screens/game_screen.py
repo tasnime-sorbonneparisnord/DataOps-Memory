@@ -9,8 +9,9 @@ from ui.button import Button
 from ui.card_renderer import CardRenderer
 from ui.drawing import draw_database_icon, draw_panel, draw_text, wrap_text
 from ui.grid_layout import GridLayout
-from ui.settings import (COLORS, GRID_AREA_WIDTH, HEADER_HEIGHT, MARGIN, MISMATCH_DELAY,
-                         SIDE_PANEL_WIDTH, THEME_NAMES, WINDOW_HEIGHT, WINDOW_WIDTH)
+from ui.settings import (COLORS, GRID_AREA_WIDTH, HEADER_HEIGHT, MARGIN, MESSAGE_DURATION,
+                         MISMATCH_DELAY, SIDE_PANEL_WIDTH, SPECIAL_FLASH_DURATION, THEME_NAMES,
+                         WINDOW_HEIGHT, WINDOW_WIDTH)
 from ui.screens.base import Screen
 
 HUD_BOX_WIDTH, HUD_BOX_HEIGHT, HUD_GAP = 200, 74, 16
@@ -45,9 +46,14 @@ class GameScreen(Screen):
 
         
         self._mismatch_timer = None
+        self._flashing = {}          # numéro de carte -> temps d'affichage restant
+        self._message = None         # (texte, couleur, temps restant)
         self._reactions = {
+            SelectionOutcome.MATCH: self._on_match,
             SelectionOutcome.MISMATCH: self._on_mismatch,
+            SelectionOutcome.SPECIAL_ACTIVATED: self._on_special,
         }
+        
 
     # ------------------------------------------------------------------
     # Événements
@@ -73,6 +79,20 @@ class GameScreen(Screen):
     def _on_mismatch(self, index):
         self._mismatch_timer = MISMATCH_DELAY
 
+    def _on_match(self, index):
+        self._show_message("Incident réparé !", COLORS["success"])
+
+    def _on_special(self, index):
+        seconds = self.game.board.get_card_at(index).activate().seconds_delta
+        self._flashing[index] = SPECIAL_FLASH_DURATION
+        if seconds > 0:
+            self._show_message(f"Pause café ! +{seconds} s", COLORS["success"])
+        else:
+            self._show_message(f"Incident critique ! −{-seconds} s", COLORS["danger"])
+
+    def _show_message(self, text, color):
+        self._message = (text, color, MESSAGE_DURATION)
+
     # ------------------------------------------------------------------
     # Temps
     # ------------------------------------------------------------------
@@ -80,6 +100,8 @@ class GameScreen(Screen):
     def update(self, delta_seconds: float):
         self.game.update(delta_seconds)
         self._update_mismatch(delta_seconds)
+        self._update_flashing(delta_seconds)
+        self._update_message(delta_seconds)
 
     def _update_mismatch(self, delta_seconds):
         if self._mismatch_timer is None:
@@ -88,6 +110,18 @@ class GameScreen(Screen):
         if self._mismatch_timer <= 0:
             self.game.resolve_mismatch()
             self._mismatch_timer = None
+
+  
+    def _update_flashing(self, delta_seconds):
+        self._flashing = {index: remaining - delta_seconds
+                          for index, remaining in self._flashing.items()
+                          if remaining - delta_seconds > 0}
+
+    def _update_message(self, delta_seconds):
+        if self._message:
+            text, color, remaining = self._message
+            remaining -= delta_seconds
+            self._message = (text, color, remaining) if remaining > 0 else None          
 
     # ------------------------------------------------------------------
     # Dessin
@@ -98,6 +132,7 @@ class GameScreen(Screen):
         self._draw_header(surface)
         self._draw_cards(surface)
         self._draw_side_panel(surface)
+        self._draw_message(surface)
 
     def _draw_header(self, surface):
         fonts = self.app.fonts
@@ -129,7 +164,8 @@ class GameScreen(Screen):
     def _draw_cards(self, surface):
         draw_panel(surface, self._grid_frame)
         for index, card in enumerate(self.game.board.get_cards()):
-            self._renderer.draw(surface, card, self._layout.rect_of(index))
+              self._renderer.draw(surface, card, self._layout.rect_of(index),
+                                force_face=index in self._flashing)
 
     def _draw_side_panel(self, surface):
         fonts, panel = self.app.fonts, self._panel
@@ -150,6 +186,12 @@ class GameScreen(Screen):
             draw_text(surface, f"•  {THEME_NAMES.get(theme, theme)}", fonts.get(19),
                       COLORS["text"], topleft=(x + 6, y + 48 + number * 26))
 
+        if self.game.last_explanation:
+            top = y + 48 + len(self.app.library.themes) * 26 + 14
+            draw_text(surface, "Dernière réparation", fonts.get(20, bold=True),
+                      COLORS["success"], topleft=(x, top))
+            self._draw_paragraph(surface, self.game.last_explanation, x, top + 30, width, size=17)
+
         self._menu_button.draw(surface, fonts)
 
     def _draw_paragraph(self, surface, text, x, y, width, size=19):
@@ -169,3 +211,13 @@ class GameScreen(Screen):
         if filled.width:
             pygame.draw.rect(surface, COLORS["success"], filled, border_radius=7)
         return bar.bottom
+
+    def _draw_message(self, surface):
+        if not self._message:
+            return
+        text, color, _ = self._message
+        font = self.app.fonts.get(28, bold=True)
+        box = pygame.Rect(0, 0, font.size(text)[0] + 60, 60)
+        box.midbottom = (self._grid_area.centerx, self._grid_area.bottom - 10)
+        draw_panel(surface, box, border=color, radius=30, width=3)
+        draw_text(surface, text, font, color, center=box.center)
