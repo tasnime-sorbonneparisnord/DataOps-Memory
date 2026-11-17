@@ -29,6 +29,14 @@ class Slider:
                                   self._plus.left - self._minus.right - 44, 10)
         self._track.centery = self.rect.centery
 
+    @property
+    def minus_rect(self) -> pygame.Rect:
+        return self._minus
+
+    @property
+    def plus_rect(self) -> pygame.Rect:
+        return self._plus
+
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if self._minus.collidepoint(event.pos):
