@@ -75,8 +75,8 @@ class LevelIntroScreen(MenuPage):
         self.app.show_levels()
 
     def handle_page_event(self, event):
-        if self._start_button.is_clicked(event):        # fondu au noir, puis la partie
-            self.app.fade_to(lambda: self.app.start_game(self._difficulty))
+        if self._start_button.is_clicked(event):   # fondu au noir, vidéo, fondu, partie
+            self.app.fade_to(lambda: self.app.show_cinematic(self._difficulty))
 
     def update(self, delta_seconds):
         if self._sprite is not None:

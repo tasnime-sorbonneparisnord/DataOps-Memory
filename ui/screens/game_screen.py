@@ -1,21 +1,32 @@
-"""Écran de jeu : la grille de cartes, la barre d'infos et le panneau « Mission »."""
+"""Écran de jeu : la grille au centre, le temps, les essais et le record à gauche, la mission à droite."""
 
 import math
 
 import pygame
 
 from game.enums import SelectionOutcome
-from ui.button import Button
 from ui.card_renderer import CardRenderer
-from ui.drawing import draw_database_icon, draw_panel, draw_text, line_height, wrap_text
+from ui.drawing import draw_panel, draw_text, wrap_text
+from ui.effects import MatchEffect
 from ui.grid_layout import GridLayout
-from ui.settings import (COLORS, END_DELAY, GRID_AREA_WIDTH, HEADER_HEIGHT, MARGIN,
-                         MESSAGE_DURATION, MISMATCH_DELAY, SIDE_PANEL_WIDTH,
-                         SPECIAL_FLASH_DURATION, THEME_NAMES, WINDOW_HEIGHT, WINDOW_WIDTH)
+from ui.hud import (HUD_COLORS, RoundButton, draw_effect_badge, draw_player_bar,
+                    draw_progress_bar, draw_stat_panel)
 from ui.screens.base import Screen
+from ui.settings import (COLORS, END_DELAY, LEVEL_NAMES, MESSAGE_DURATION, MISMATCH_DELAY,
+                         SPECIAL_FLASH_DURATION, WINDOW_WIDTH)
 
-HUD_BOX_WIDTH, HUD_BOX_HEIGHT, HUD_GAP = 200, 74, 16
 LOW_TIME_SECONDS = 10
+EXPLANATION_DURATION = 3.5          # temps d'affichage de l'explication après une paire
+
+# Disposition : colonne de gauche, grille au centre, colonne de droite
+LEFT_X, COLUMN_WIDTH = 24, 220
+STAT_PANELS_TOP, STAT_PANEL_HEIGHT, STAT_PANEL_GAP = 130, 132, 16
+GRID_AREA = pygame.Rect(276, 124, 724, 652)
+RIGHT_X = 1032
+MISSION_RECT = pygame.Rect(RIGHT_X, 130, COLUMN_WIDTH, 250)
+BOARD_COLORS = {"frame": (58, 36, 92), "border": (130, 92, 190), "slot": (40, 26, 66)}
+BACKGROUND_VEIL = (20, 30, 70, 70)
+TOAST_CENTER_X, TOAST_TOP, TOAST_TEXT_WIDTH = 805, 14, 560   # message en haut, sans cacher les cartes
 
 
 def format_time(seconds: float) -> str:
@@ -35,19 +46,17 @@ class GameScreen(Screen):
         super().__init__(app)
         self.game = app.game
         self._renderer = CardRenderer(app.fonts, app.icons)
-        self._grid_area = pygame.Rect(MARGIN, HEADER_HEIGHT + 30, GRID_AREA_WIDTH,
-                                      WINDOW_HEIGHT - HEADER_HEIGHT - 30 - MARGIN)
-        self._grid_frame = self._grid_area.inflate(24, 24)
-        self._panel = pygame.Rect(self._grid_frame.right + 18, self._grid_frame.top,
-                                  SIDE_PANEL_WIDTH, self._grid_frame.height)
-        self._layout = GridLayout(self._grid_area, self.game.level.rows, self.game.level.columns)
-        self._menu_button = Button((self._panel.left + 20, self._panel.bottom - 76,
-                                    self._panel.width - 40, 56), "Retour au menu", primary=False)
+        self._layout = GridLayout(GRID_AREA, self.game.level.rows, self.game.level.columns)
+        cards = [self._layout.rect_of(i) for i in range(len(self.game.board.get_cards()))]
+        self._grid_frame = cards[0].unionall(cards).inflate(36, 36)     # cadre ajusté aux cartes
+        self._home_button = RoundButton((WINDOW_WIDTH - 60, 62), 34, "menu_back.png")
+        self._background = self._create_background()
 
         self._mismatch_timer = None
         self._end_timer = None
         self._flashing = {}          # numéro de carte -> temps d'affichage restant
-        self._message = None         # (texte, couleur, temps restant)
+        self._message = None         # (titre, couleur, temps restant, détail)
+        self._match_effects = []     # animations des paires trouvées en cours
         self._reactions = {
             SelectionOutcome.MATCH: self._on_match,
             SelectionOutcome.MISMATCH: self._on_mismatch,
@@ -61,7 +70,7 @@ class GameScreen(Screen):
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             self.app.show_menu()
-        elif self._menu_button.is_clicked(event):
+        elif self._home_button.is_clicked(event):
             self.app.show_menu()
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             self._on_click(event.pos)
@@ -71,26 +80,40 @@ class GameScreen(Screen):
         if index is None or self.game.is_over():
             return
         outcome = self.game.select_card(index)
+        if outcome != SelectionOutcome.REJECTED:
+            self.app.sound.play("flip")
         reaction = self._reactions.get(outcome)
         if reaction:
             reaction(index)
 
     def _on_match(self, index):
-        self._show_message("Incident réparé !", COLORS["success"])
+        self.app.sound.play("match")
+        pair = self._pair_indices(index)
+        self._match_effects.append(MatchEffect(pair, [self._layout.rect_of(i) for i in pair]))
+        self._show_message("Incident réparé !", COLORS["success"],
+                           detail=self.game.last_explanation, duration=EXPLANATION_DURATION)
+
+    def _pair_indices(self, index) -> list:
+        """La carte cliquée et sa partenaire (même identifiant de paire)."""
+        cards = self.game.board.get_cards()
+        pair_id = getattr(cards[index], "pair_id", None)
+        return [i for i, card in enumerate(cards) if getattr(card, "pair_id", None) == pair_id]
 
     def _on_mismatch(self, index):
+        self.app.sound.play("mismatch")
         self._mismatch_timer = MISMATCH_DELAY
 
     def _on_special(self, index):
         seconds = self.game.board.get_card_at(index).activate().seconds_delta
         self._flashing[index] = SPECIAL_FLASH_DURATION
+        self.app.sound.play("coffee" if seconds > 0 else "critical")
         if seconds > 0:
             self._show_message(f"Pause café ! +{seconds} s", COLORS["success"])
         else:
             self._show_message(f"Incident critique ! −{-seconds} s", COLORS["danger"])
 
-    def _show_message(self, text, color):
-        self._message = (text, color, MESSAGE_DURATION)
+    def _show_message(self, text, color, detail="", duration=MESSAGE_DURATION):
+        self._message = (text, color, duration, detail)
 
     # ------------------------------------------------------------------
     # Temps
@@ -101,6 +124,7 @@ class GameScreen(Screen):
         self._update_mismatch(delta_seconds)
         self._update_flashing(delta_seconds)
         self._update_message(delta_seconds)
+        self._update_match_effects(delta_seconds)
         self._update_end(delta_seconds)
 
     def _update_mismatch(self, delta_seconds):
@@ -118,9 +142,14 @@ class GameScreen(Screen):
 
     def _update_message(self, delta_seconds):
         if self._message:
-            text, color, remaining = self._message
+            text, color, remaining, detail = self._message
             remaining -= delta_seconds
-            self._message = (text, color, remaining) if remaining > 0 else None
+            self._message = (text, color, remaining, detail) if remaining > 0 else None
+
+    def _update_match_effects(self, delta_seconds):
+        for effect in self._match_effects:
+            effect.update(delta_seconds)
+        self._match_effects = [effect for effect in self._match_effects if not effect.finished]
 
     def _update_end(self, delta_seconds):
         if not self.game.is_over():
@@ -135,98 +164,95 @@ class GameScreen(Screen):
     # Dessin
     # ------------------------------------------------------------------
 
+    def _create_background(self) -> pygame.Surface:
+        background = self.app.menu_background.copy()
+        veil = pygame.Surface(background.get_size(), pygame.SRCALPHA)
+        veil.fill(BACKGROUND_VEIL)
+        background.blit(veil, (0, 0))
+        return background
+
     def draw(self, surface):
-        surface.blit(self.app.background, (0, 0))
-        self._draw_header(surface)
-        self._draw_cards(surface)
-        self._draw_side_panel(surface)
+        surface.blit(self._background, (0, 0))
+        self._draw_left_column(surface)
+        self._draw_board(surface)
+        self._draw_right_column(surface)
+        self._home_button.draw(surface, self.app.icons)
         self._draw_message(surface)
 
-    def _draw_header(self, surface):
+    def _draw_left_column(self, surface):
         fonts = self.app.fonts
-        draw_database_icon(surface, (MARGIN + 26, 60), 44, COLORS["title"],
-                           COLORS["background_top"])
-        draw_text(surface, "DataOps Memory", fonts.get(40, bold=True), COLORS["title"],
-                  midleft=(MARGIN + 66, 60))
+        level_name = f"Niveau {LEVEL_NAMES[self.game.difficulty.value]}"
+        draw_player_bar(surface, (LEFT_X, 18), fonts, self.app.profile.pseudo, level_name)
 
         best = self.app.scores.get_best(self.game.difficulty)
-        boxes = [
-            ("Temps restant", format_time(self.game.remaining_time), self._time_color()),
-            ("Tentatives", str(self.game.attempts), COLORS["text"]),
-            ("Meilleur", f"{best.time_left} s" if best else "—", COLORS["text"]),
+        panels = [
+            ("Temps", format_time(self.game.remaining_time), self._time_color(), ""),
+            ("Essais", str(self.game.attempts), None, ""),
+            ("Record", f"{best.time_left} s" if best else "—", None,
+             f"{best.attempts} essais" if best else "à battre !"),
         ]
-        left = WINDOW_WIDTH - MARGIN - 3 * HUD_BOX_WIDTH - 2 * HUD_GAP
-        for number, (title, value, color) in enumerate(boxes):
-            rect = pygame.Rect(left + number * (HUD_BOX_WIDTH + HUD_GAP), 24,
-                               HUD_BOX_WIDTH, HUD_BOX_HEIGHT)
-            draw_panel(surface, rect)
-            draw_text(surface, title, fonts.get(18), COLORS["text_muted"],
-                      center=(rect.centerx, rect.top + 22))
-            draw_text(surface, value, fonts.get(32, bold=True), color,
-                      center=(rect.centerx, rect.top + 52))
+        for number, (title, value, color, detail) in enumerate(panels):
+            top = STAT_PANELS_TOP + number * (STAT_PANEL_HEIGHT + STAT_PANEL_GAP)
+            draw_stat_panel(surface, (LEFT_X, top, COLUMN_WIDTH, STAT_PANEL_HEIGHT), fonts,
+                            title, value, value_color=color, detail=detail)
 
     def _time_color(self):
         low = self.game.remaining_time <= LOW_TIME_SECONDS
-        return COLORS["danger"] if low else COLORS["text"]
+        return HUD_COLORS["danger"] if low else None
 
-    def _draw_cards(self, surface):
-        draw_panel(surface, self._grid_frame)
+    def _draw_board(self, surface):
+        pygame.draw.rect(surface, BOARD_COLORS["frame"], self._grid_frame, border_radius=20)
+        pygame.draw.rect(surface, BOARD_COLORS["border"], self._grid_frame, 5, border_radius=20)
+        animated = {}                                  # numéro de carte -> son animation
+        for effect in self._match_effects:
+            animated.update({index: effect for index in effect.indices})
         for index, card in enumerate(self.game.board.get_cards()):
-            self._renderer.draw(surface, card, self._layout.rect_of(index),
-                                force_face=index in self._flashing)
+            rect = self._layout.rect_of(index)
+            pygame.draw.rect(surface, BOARD_COLORS["slot"], rect.inflate(6, 6), border_radius=14)
+            if index not in animated:
+                self._renderer.draw(surface, card, rect, force_face=index in self._flashing)
+        for index, effect in animated.items():        # dessinées en dernier : au-dessus des autres
+            effect.draw_card(surface, self._card_image(index), self._layout.rect_of(index))
+        for effect in self._match_effects:
+            effect.draw_particles(surface)
 
-    def _draw_side_panel(self, surface):
-        fonts, panel = self.app.fonts, self._panel
-        draw_panel(surface, panel)
-        x, width = panel.left + 22, panel.width - 44
+    def _card_image(self, index) -> pygame.Surface:
+        """La face de la carte dessinée sur une image à part, pour pouvoir l'agrandir."""
+        rect = self._layout.rect_of(index)
+        image = pygame.Surface(rect.size, pygame.SRCALPHA)
+        self._renderer.draw(image, self.game.board.get_card_at(index), image.get_rect(),
+                            force_face=True)
+        return image
 
-        draw_text(surface, "Mission DataOps", fonts.get(26, bold=True), COLORS["title"],
-                  topleft=(x, panel.top + 20))
-        y = self._draw_paragraph(surface, "Associez chaque incident à sa solution pour "
-                                 "remettre les services en ligne !", x, panel.top + 62, width)
+    def _draw_right_column(self, surface):
+        fonts, level = self.app.fonts, self.game.level
+        box = draw_stat_panel(surface, MISSION_RECT, fonts, "Mission",
+                              f"{self.game.resolved_count} / {level.incident_count}",
+                              detail="incidents réparés")
+        draw_progress_bar(surface, (MISSION_RECT.left + 18, MISSION_RECT.bottom + 14,
+                                    COLUMN_WIDTH - 36, 16),
+                          self.game.resolved_count, level.incident_count)
 
-        level = self.game.level
-        y = self._draw_progress(surface, x, y + 16, width,
-                                self.game.resolved_count, level.incident_count)
-
-        draw_text(surface, "Thèmes", fonts.get(20, bold=True), COLORS["text"], topleft=(x, y + 18))
-        for number, theme in enumerate(sorted(self.app.library.themes)):
-            draw_text(surface, f"•  {THEME_NAMES.get(theme, theme)}", fonts.get(19),
-                      COLORS["text"], topleft=(x + 6, y + 48 + number * 26))
-
-        if self.game.last_explanation:
-            top = y + 48 + len(self.app.library.themes) * 26 + 14
-            draw_text(surface, "Dernière réparation", fonts.get(20, bold=True),
-                      COLORS["success"], topleft=(x, top))
-            self._draw_paragraph(surface, self.game.last_explanation, x, top + 30, width, size=17)
-
-        self._menu_button.draw(surface, fonts)
-
-    def _draw_paragraph(self, surface, text, x, y, width, size=19):
-        font = self.app.fonts.get(size)
-        step = line_height(font) + 2
-        for line in wrap_text(text, font, width):
-            draw_text(surface, line, font, COLORS["text"], topleft=(x, y))
-            y += step
-        return y
-
-    def _draw_progress(self, surface, x, y, width, done, total):
-        draw_text(surface, f"Incidents réparés : {done} / {total}", self.app.fonts.get(19, bold=True),
-                  COLORS["text"], topleft=(x, y))
-        bar = pygame.Rect(x, y + 30, width, 14)
-        pygame.draw.rect(surface, COLORS["empty_slot"], bar, border_radius=7)
-        filled = bar.copy()
-        filled.width = round(width * done / total) if total else 0
-        if filled.width:
-            pygame.draw.rect(surface, COLORS["success"], filled, border_radius=7)
-        return bar.bottom
+        effects = [("coffee.png", f"+{level.effect_seconds} s", level.coffee_count),
+                   ("critical.png", f"-{level.effect_seconds} s", level.critical_count)]
+        y = MISSION_RECT.bottom + 100
+        for icon_file, text, count in effects:
+            if count:
+                draw_effect_badge(surface, (MISSION_RECT.centerx, y), fonts, self.app.icons,
+                                  icon_file, text, count)
+                y += 130
 
     def _draw_message(self, surface):
         if not self._message:
             return
-        text, color, _ = self._message
-        font = self.app.fonts.get(28, bold=True)
-        box = pygame.Rect(0, 0, font.size(text)[0] + 60, 60)
-        box.midbottom = (self._grid_area.centerx, self._grid_area.bottom - 10)
-        draw_panel(surface, box, border=color, radius=30, width=3)
-        draw_text(surface, text, font, color, center=box.center)
+        text, color, _, detail = self._message
+        title_font, detail_font = self.app.fonts.get(30), self.app.fonts.get(18)
+        lines = wrap_text(detail, detail_font, TOAST_TEXT_WIDTH)[:3] if detail else []
+        width = max([title_font.size(text)[0]] + [detail_font.size(line)[0] for line in lines]) + 60
+        box = pygame.Rect(0, 0, width, 62 + 24 * len(lines))
+        box.midtop = (TOAST_CENTER_X, TOAST_TOP)
+        draw_panel(surface, box, border=color, radius=24, width=4)
+        draw_text(surface, text, title_font, color, center=(box.centerx, box.top + 30))
+        for number, line in enumerate(lines):
+            draw_text(surface, line, detail_font, COLORS["text"],
+                      center=(box.centerx, box.top + 64 + number * 24))

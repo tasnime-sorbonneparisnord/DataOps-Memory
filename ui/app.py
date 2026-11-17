@@ -5,6 +5,7 @@ import pygame
 from game.memory_game import MemoryGame
 from ui.drawing import FontBook, draw_vertical_gradient
 from ui.icons import IconLoader
+from ui.screens.cinematic_screen import CinematicScreen
 from ui.screens.credits_screen import CreditsScreen
 from ui.screens.end_screen import EndScreen
 from ui.screens.game_screen import GameScreen
@@ -18,18 +19,19 @@ from ui.screens.settings_screen import SettingsScreen
 from ui.screens.splash_screen import SplashScreen
 from ui.settings import (COLORS, FPS, MENU_BACKGROUND_FILE, WINDOW_HEIGHT, WINDOW_TITLE,
                          WINDOW_WIDTH)
+from ui.sound import SoundManager
 from ui.transition import FadeTransition
 
 
 class App:
     """Crée la fenêtre, fait tourner la boucle et affiche l'écran en cours.
 
-    La logique du jeu (MemoryGame), les incidents, les scores et le profil du
-    joueur sont reçus de l'extérieur (injection de dépendances) : l'interface
-    ne lit aucun fichier de données elle-même.
+    La logique du jeu (MemoryGame), les incidents, les scores, le profil du
+    joueur et ses paramètres sont reçus de l'extérieur (injection de
+    dépendances) : l'interface ne lit aucun fichier de données elle-même.
     """
 
-    def __init__(self, library, scores, profile):
+    def __init__(self, library, scores, profile, settings):
         pygame.init()
         self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption(WINDOW_TITLE)
@@ -38,6 +40,8 @@ class App:
         self.library = library
         self.scores = scores
         self.profile = profile
+        self.settings = settings
+        self.sound = SoundManager(settings)
         self.game = MemoryGame(library)
         self.fonts = FontBook()
         self.icons = IconLoader()
@@ -47,6 +51,7 @@ class App:
         self._current = SplashScreen(self)      # le jeu commence par l'écran de démarrage
         self._running = True
         self._transition = None                 # fondu au noir en cours, ou None
+        self._brightness_veil = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
 
     # ------------------------------------------------------------------
     # Navigation entre les écrans (appelée par les écrans eux-mêmes)
@@ -63,6 +68,10 @@ class App:
 
     def show_level_intro(self, difficulty):
         self._current = LevelIntroScreen(self, difficulty)
+
+    def show_cinematic(self, difficulty):
+        """La vidéo d'introduction, puis la partie du niveau choisi."""
+        self._current = CinematicScreen(self, on_finish=lambda: self.start_game(difficulty))
 
     def show_rules(self):
         self._current = RulesScreen(self)
@@ -97,6 +106,7 @@ class App:
     # ------------------------------------------------------------------
 
     def run(self):
+        self.sound.start_music()
         while self._running:
             delta_seconds = self.clock.tick(FPS) / 1000
             for event in pygame.event.get():
@@ -109,12 +119,24 @@ class App:
             else:                                    # l'écran est figé pendant le fondu :
                 self._transition.update(delta_seconds)   # le chrono ne tourne pas encore
             self._current.draw(self.screen)
+            self._apply_brightness(self.screen)
             if self._transition is not None:
                 self._transition.draw(self.screen)
                 if self._transition.finished:
                     self._transition = None
             pygame.display.flip()
         pygame.quit()
+
+    def _apply_brightness(self, surface):
+        """Voile noir (plus sombre) ou blanc (plus clair) selon le réglage de luminosité."""
+        level = self.settings.brightness              # 50 = normal
+        if level == 50:
+            return
+        color = (0, 0, 0) if level < 50 else (255, 255, 255)
+        alpha = round(abs(level - 50) * (4 if level < 50 else 2))   # max 200 / 100
+        self._brightness_veil.fill(color)
+        self._brightness_veil.set_alpha(alpha)
+        surface.blit(self._brightness_veil, (0, 0))
 
     # ------------------------------------------------------------------
     # Images de fond, préparées une seule fois

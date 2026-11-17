@@ -6,10 +6,11 @@ Lancement :  python main.py
 import sys
 
 from storage.incident_library import IncidentLibrary, IncidentLibraryError
+from storage.game_settings import GameSettings
 from storage.player_profile import PlayerProfile
 from storage.score_repository import ScoreRepository
 from ui.app import App
-from ui.settings import INCIDENTS_FILE, PLAYER_FILE, SCORES_FILE
+from ui.settings import INCIDENTS_FILE, PLAYER_FILE, SCORES_FILE, SETTINGS_FILE
 
 
 def main():
@@ -21,7 +22,8 @@ def main():
 
     scores = ScoreRepository(SCORES_FILE)
     profile = PlayerProfile(PLAYER_FILE)
-    App(library, scores, profile).run()
+    settings = GameSettings(SETTINGS_FILE)
+    App(library, scores, profile, settings).run()
 
 
 if __name__ == "__main__":
