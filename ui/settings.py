@@ -15,7 +15,8 @@ DATA_DIR = PROJECT_DIR / "data"
 INCIDENTS_FILE = DATA_DIR / "incidents.json"
 SCORES_FILE = DATA_DIR / "best_scores.json"
 ICONS_DIR = PROJECT_DIR / "assets" / "icons"
-MENU_BACKGROUND_FILE = PROJECT_DIR / "assets" / "images" / "menu_background.png"
+IMAGES_DIR = PROJECT_DIR / "assets" / "images"
+MENU_BACKGROUND_FILE = IMAGES_DIR / "menu_background.png"
 
 COLORS = {
     # Fond et panneaux
