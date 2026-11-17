@@ -14,6 +14,7 @@ PROJECT_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = PROJECT_DIR / "data"
 INCIDENTS_FILE = DATA_DIR / "incidents.json"
 SCORES_FILE = DATA_DIR / "best_scores.json"
+PLAYER_FILE = DATA_DIR / "player.json"
 ICONS_DIR = PROJECT_DIR / "assets" / "icons"
 IMAGES_DIR = PROJECT_DIR / "assets" / "images"
 FONTS_DIR = PROJECT_DIR / "assets" / "fonts"

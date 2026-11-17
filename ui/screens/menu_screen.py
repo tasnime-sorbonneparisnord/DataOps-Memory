@@ -4,6 +4,7 @@ import pygame
 
 from ui.drawing import draw_database_icon, draw_text
 from ui.floating_sprite import FloatingSprite, load_image, wave
+from ui.gold_style import draw_gold_frame, render_gold_title
 from ui.screens.base import Screen
 from ui.section_button import SectionButton
 from ui.settings import COLORS, WINDOW_WIDTH
@@ -116,8 +117,20 @@ class MenuScreen(Screen):
         for sprite in self._sprites:
             sprite.draw(surface)
         self._draw_texts(surface)
+        self._draw_player(surface)
         for button, _ in self._sections:
             button.draw(surface, self.app.fonts, self.app.icons)
+
+    def _draw_player(self, surface):
+        """Pseudo du joueur en haut à droite, dans un petit cadre doré."""
+        pseudo = self.app.profile.pseudo
+        if not pseudo:
+            return
+        label = render_gold_title(f"Salut, {pseudo} !", self.app.fonts.get(24))
+        frame = label.get_rect().inflate(36, 22)
+        frame.topright = (WINDOW_WIDTH - 24, 22)
+        draw_gold_frame(surface, frame)
+        surface.blit(label, label.get_rect(center=frame.center))
 
     def _draw_texts(self, surface):
         fonts = self.app.fonts

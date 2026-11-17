@@ -78,7 +78,7 @@ class SplashScreen(Screen):
 
     def handle_event(self, event):
         if event.type in (pygame.MOUSEBUTTONDOWN, pygame.KEYDOWN):
-            self.app.show_menu()
+            self.app.show_pseudo()
 
     def update(self, delta_seconds):
         self._time += delta_seconds

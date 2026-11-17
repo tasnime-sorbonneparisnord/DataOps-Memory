@@ -22,12 +22,14 @@ class MenuPage(Screen):
     Échap ou le bouton « Retour » ramènent à l'accueil.
     """
 
-    def __init__(self, app, title):
+    def __init__(self, app, title, back_rect=BACK_RECT):
         super().__init__(app)
         self.title = title
         self._background = self._create_background()
-        self._back_button = SectionButton(BACK_RECT, "Retour", icon="menu_back.png",
-                                          title_size=30)
+        self._back_button = None              # back_rect=None : page sans bouton « Retour »
+        if back_rect is not None:
+            self._back_button = SectionButton(back_rect, "Retour", icon="menu_back.png",
+                                              title_size=30)
 
     def _create_background(self) -> pygame.Surface:
         background = self.app.menu_background.copy()
@@ -38,7 +40,8 @@ class MenuPage(Screen):
 
     def handle_event(self, event):
         escape = event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE
-        if escape or self._back_button.is_clicked(event):
+        back_clicked = self._back_button is not None and self._back_button.is_clicked(event)
+        if escape or back_clicked:
             self.go_back()
         else:
             self.handle_page_event(event)
@@ -55,7 +58,8 @@ class MenuPage(Screen):
         title = render_gold_title(self.title, self.app.fonts.get(64))
         surface.blit(title, title.get_rect(center=(CENTER_X, 80)))
         self.draw_content(surface)
-        self._back_button.draw(surface, self.app.fonts, self.app.icons)
+        if self._back_button is not None:
+            self._back_button.draw(surface, self.app.fonts, self.app.icons)
 
     @abstractmethod
     def draw_content(self, surface):
