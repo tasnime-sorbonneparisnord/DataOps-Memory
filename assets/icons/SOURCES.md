@@ -18,3 +18,13 @@ Elles ont été converties en PNG blanc sur fond transparent (256 x 256 px).
 | pipeline_solution.png | workflow |
 | coffee.png | coffee |
 | critical.png | siren |
+| menu_play.png | gamepad-2 |
+| menu_rules.png | book-open |
+| menu_scores.png | trophy |
+| menu_settings.png | settings |
+| menu_credits.png | users |
+| menu_quit.png | log-out |
+| menu_back.png | arrow-left |
+| settings_brightness.png | sun |
+| settings_volume.png | volume-2 |
+| settings_language.png | languages |

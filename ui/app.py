@@ -5,10 +5,15 @@ import pygame
 from game.memory_game import MemoryGame
 from ui.drawing import FontBook, draw_vertical_gradient
 from ui.icons import IconLoader
+from ui.screens.credits_screen import CreditsScreen
 from ui.screens.end_screen import EndScreen
 from ui.screens.game_screen import GameScreen
-from ui.screens.rules_screen import RulesScreen
+from ui.screens.levels_screen import LevelsScreen
 from ui.screens.menu_screen import MenuScreen
+from ui.screens.rules_screen import RulesScreen
+from ui.screens.scores_screen import ScoresScreen
+from ui.screens.settings_screen import SettingsScreen
+from ui.screens.splash_screen import SplashScreen
 from ui.settings import (COLORS, FPS, MENU_BACKGROUND_FILE, WINDOW_HEIGHT, WINDOW_TITLE,
                          WINDOW_WIDTH)
 
@@ -35,7 +40,7 @@ class App:
         self.background = self._create_background()
         self.menu_background = self._load_menu_background()
 
-        self._current = MenuScreen(self)
+        self._current = SplashScreen(self)      # le jeu commence par l'écran de démarrage
         self._running = True
 
     # ------------------------------------------------------------------
@@ -45,8 +50,20 @@ class App:
     def show_menu(self):
         self._current = MenuScreen(self)
 
+    def show_levels(self):
+        self._current = LevelsScreen(self)
+
     def show_rules(self):
         self._current = RulesScreen(self)
+
+    def show_scores(self):
+        self._current = ScoresScreen(self)
+
+    def show_settings(self):
+        self._current = SettingsScreen(self)
+
+    def show_credits(self):
+        self._current = CreditsScreen(self)
 
     def start_game(self, difficulty):
         self.game.start(difficulty)

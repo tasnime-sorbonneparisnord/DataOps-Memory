@@ -2,21 +2,39 @@
 
 import pygame
 
-from ui.settings import COLORS, CORNER_RADIUS, FONT_NAMES
+from ui.settings import COLORS, CORNER_RADIUS, DISPLAY_FONT_FILE, FONT_NAMES
 
 
 class FontBook:
-    """Charge chaque police une seule fois et la garde en mémoire."""
+    """Charge chaque police une seule fois et la garde en mémoire.
 
-    def __init__(self, names: str = FONT_NAMES):
-        self._names = names
+    Tout le jeu utilise la police Luckiest Guy (assets/fonts). Si le fichier
+    manque, on prend une police du système pour ne pas planter.
+    """
+
+    def __init__(self, font_file=DISPLAY_FONT_FILE, fallback_names: str = FONT_NAMES):
+        self._font_file = font_file
+        self._fallback_names = fallback_names
         self._cache = {}
 
     def get(self, size: int, bold: bool = False) -> pygame.font.Font:
+        """Police à la taille voulue (bold ne sert que pour la police de secours)."""
         key = (size, bold)
         if key not in self._cache:
-            self._cache[key] = pygame.font.SysFont(self._names, size, bold=bold)
+            try:
+                self._cache[key] = pygame.font.Font(str(self._font_file), size)
+            except (FileNotFoundError, OSError):
+                self._cache[key] = pygame.font.SysFont(self._fallback_names, size, bold=bold)
         return self._cache[key]
+
+    def display(self, size: int) -> pygame.font.Font:
+        """Police des grands titres (la même, gardée pour la lisibilité du code)."""
+        return self.get(size, bold=True)
+
+
+def line_height(font) -> int:
+    """Hauteur d'une ligne de texte, la même que le texte ait des accents ou non."""
+    return max(font.get_height(), font.size("ÉÀÇgjpy")[1])
 
 
 def draw_vertical_gradient(surface, top_color, bottom_color):
@@ -35,16 +53,21 @@ def draw_panel(surface, rect, fill=None, border=None, radius=CORNER_RADIUS, widt
 
 
 def draw_text(surface, text, font, color, *, center=None, topleft=None, midleft=None):
-    """Écrit un texte, positionné par son centre, son coin haut gauche ou son milieu gauche."""
+    """Écrit un texte, positionné par son centre, son coin haut gauche ou son milieu gauche.
+
+    Avec Luckiest Guy, l'image d'un texte est plus haute quand il y a des
+    accents (É, À...). On place donc le texte dans une « boîte » de hauteur
+    fixe, alignée en bas : toutes les lignes restent sur la même ligne de base.
+    """
     image = font.render(text, True, color)
-    rect = image.get_rect()
+    rect = pygame.Rect(0, 0, image.get_width(), line_height(font))
     if center is not None:
         rect.center = center
     elif midleft is not None:
         rect.midleft = midleft
     else:
         rect.topleft = topleft or (0, 0)
-    surface.blit(image, rect)
+    surface.blit(image, (rect.left, rect.bottom - image.get_height()))
     return rect
 
 
@@ -63,14 +86,34 @@ def wrap_text(text: str, font, max_width: int) -> list:
     return lines
 
 
+def render_outlined_text(text, font, color, outlines) -> pygame.Surface:
+    """Texte avec un ou plusieurs contours épais, comme un logo de jeu.
+
+    outlines est une liste de (couleur, épaisseur), du contour extérieur
+    vers l'intérieur. Exemple : [(blanc, 12), (noir, 7)].
+    """
+    margin = max((width for _, width in outlines), default=0)
+    fill = font.render(text, True, color)
+    surface = pygame.Surface((fill.get_width() + 2 * margin, fill.get_height() + 2 * margin),
+                             pygame.SRCALPHA)
+    for outline_color, width in outlines:
+        outline = font.render(text, True, outline_color)
+        for dx in range(-width, width + 1, 2):        # on décale le texte tout autour
+            for dy in range(-width, width + 1, 2):
+                if dx * dx + dy * dy <= width * width:
+                    surface.blit(outline, (margin + dx, margin + dy))
+    surface.blit(fill, (margin, margin))
+    return surface
+
+
 def draw_wrapped_text(surface, text, font, color, rect, line_spacing=4):
     """Écrit un texte sur plusieurs lignes, centré dans rect."""
     lines = wrap_text(text, font, rect.width)
-    line_height = font.get_linesize() + line_spacing
-    top = rect.centery - (len(lines) * line_height - line_spacing) / 2
+    step = line_height(font) + line_spacing
+    top = rect.centery - (len(lines) * step - line_spacing) / 2
     for number, line in enumerate(lines):
         draw_text(surface, line, font, color,
-                  center=(rect.centerx, top + number * line_height + line_height / 2))
+                  center=(rect.centerx, top + number * step + step / 2))
 
 
 def draw_database_icon(surface, center, size, color, background):

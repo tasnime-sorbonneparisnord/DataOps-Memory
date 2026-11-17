@@ -23,4 +23,3 @@ class Screen(ABC):
     @abstractmethod
     def draw(self, surface):
         """Dessine l'écran."""
-        

@@ -4,7 +4,7 @@ import pygame
 
 from models.card import CardState, IncidentCard, SolutionCard
 from models.card_effect import CoffeeCard, CriticalCard
-from ui.drawing import draw_database_icon, draw_text, draw_wrapped_text
+from ui.drawing import draw_database_icon, draw_text, draw_wrapped_text, line_height
 from ui.settings import COLORS, CORNER_RADIUS
 
 # Couleur et badge de chaque type de carte : un dictionnaire plutôt qu'une suite de if/elif.
@@ -69,7 +69,7 @@ class CardRenderer:
 
     def _draw_badge(self, surface, text, rect):
         font = self._fonts.get(max(12, rect.width // 11), bold=True)
-        badge = pygame.Rect(0, 0, rect.width - 20, font.get_linesize() + 6)
+        badge = pygame.Rect(0, 0, rect.width - 20, line_height(font) + 4)
         badge.midbottom = (rect.centerx, rect.bottom - 8)
         pygame.draw.rect(surface, COLORS["badge"], badge, border_radius=badge.height // 2)
         draw_text(surface, text, font, COLORS["text"], center=badge.center)

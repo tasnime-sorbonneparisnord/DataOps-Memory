@@ -24,7 +24,7 @@ class EndScreen(Screen):
         if self._replay_button.is_clicked(event):
             self.app.start_game(self._result.difficulty)
         elif self._menu_button.is_clicked(event):
-            self.app.show_menu()
+            self.app.show_levels()
 
     def draw(self, surface):
         surface.blit(self.app.background, (0, 0))

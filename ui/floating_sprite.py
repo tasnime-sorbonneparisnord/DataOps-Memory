@@ -54,4 +54,3 @@ class FloatingSprite:
         rect = self.image.get_rect(midbottom=self.midbottom)
         rect.y += round(offset)
         surface.blit(self.image, rect)
-

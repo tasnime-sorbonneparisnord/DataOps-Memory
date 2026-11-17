@@ -16,6 +16,8 @@ INCIDENTS_FILE = DATA_DIR / "incidents.json"
 SCORES_FILE = DATA_DIR / "best_scores.json"
 ICONS_DIR = PROJECT_DIR / "assets" / "icons"
 IMAGES_DIR = PROJECT_DIR / "assets" / "images"
+FONTS_DIR = PROJECT_DIR / "assets" / "fonts"
+DISPLAY_FONT_FILE = FONTS_DIR / "LuckiestGuy-Regular.ttf"
 MENU_BACKGROUND_FILE = IMAGES_DIR / "menu_background.png"
 
 COLORS = {

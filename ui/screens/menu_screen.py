@@ -1,20 +1,26 @@
-"""Écran d'accueil animé : choix du niveau, règles du jeu et meilleurs scores."""
+"""Écran d'accueil animé : le logo, les personnages et les grandes sections du jeu."""
 
 import pygame
 
-from game.enums import Difficulty
-from ui.button import Button
 from ui.drawing import draw_database_icon, draw_text
 from ui.floating_sprite import FloatingSprite, load_image, wave
 from ui.screens.base import Screen
-from ui.settings import COLORS, LEVEL_NAMES, WINDOW_WIDTH
+from ui.section_button import SectionButton
+from ui.settings import COLORS, WINDOW_WIDTH
 
 CENTER_X = WINDOW_WIDTH // 2
 
-# Boutons de niveau empilés au centre, pour laisser de la place aux personnages
-BUTTON_WIDTH, BUTTON_HEIGHT, BUTTON_GAP = 320, 80, 14
-FIRST_BUTTON_TOP = 262
-SMALL_BUTTON_TOP = 556
+# Sections du menu, empilées au centre : (titre, sous-titre au survol, icône, action)
+SECTIONS = [
+    ("Jouer", "Choisis ton niveau et sauve la prod", "menu_play.png", "show_levels"),
+    ("Comment jouer", "Les règles en une minute", "menu_rules.png", "show_rules"),
+    ("Meilleurs scores", "Tes records pour chaque niveau", "menu_scores.png", "show_scores"),
+    ("Paramètres", "Volume, luminosité et langue", "menu_settings.png", "show_settings"),
+    ("Crédits", "L'équipe et les sources du jeu", "menu_credits.png", "show_credits"),
+    ("Quitter", "À bientôt, d'astreinte !", "menu_quit.png", "quit"),
+]
+SECTION_WIDTH, SECTION_HEIGHT, SECTION_GAP = 420, 62, 10
+FIRST_SECTION_TOP = 192
 
 # Personnages : (fichier, hauteur affichée, position du bas, amplitude, période)
 CHARACTERS = [
@@ -26,49 +32,42 @@ CHARACTERS = [
 
 # Icônes qui flottent autour des boutons : (fichier, centre, période)
 FLOATING_ICONS = [
-    ("cloud_solution.png", (395, 300), 3.2),
-    ("database_solution.png", (890, 300), 2.7),
-    ("network_solution.png", (385, 470), 2.9),
-    ("pipeline_solution.png", (895, 470), 3.5),
+    ("cloud_solution.png", (365, 250), 3.2),
+    ("database_solution.png", (915, 250), 2.7),
+    ("network_solution.png", (360, 450), 2.9),
+    ("pipeline_solution.png", (920, 450), 3.5),
 ]
 ICON_BUBBLE_SIZE = 58
 
 
 class MenuScreen(Screen):
-    """Affiche le titre, un bouton par niveau, puis « Comment jouer » et « Quitter ».
+    """Affiche le logo et un bouton par section (jouer, règles, scores, paramètres...).
 
-    Les personnages, les icônes et le titre flottent doucement grâce à update(dt).
+    Chaque section appelle une méthode de l'application (show_levels, show_rules...).
+    Les personnages, les icônes et le logo flottent doucement grâce à update(dt).
     """
 
     def __init__(self, app):
         super().__init__(app)
         self._time = 0.0
-        self._level_buttons = self._create_level_buttons()
-        self._rules_button = Button((CENTER_X - 230, SMALL_BUTTON_TOP, 220, 56),
-                                    "Comment jouer", primary=False)
-        self._quit_button = Button((CENTER_X + 10, SMALL_BUTTON_TOP, 220, 56),
-                                   "Quitter", primary=False)
+        self._sections = self._create_sections()
         self._sprites = self._create_characters() + self._create_floating_icons()
+        self._logo = load_image("logo.png", 165)      # None si l'image manque
 
     # ------------------------------------------------------------------
     # Création des éléments
     # ------------------------------------------------------------------
 
-    def _create_level_buttons(self) -> dict:
-        left = CENTER_X - BUTTON_WIDTH // 2
-        buttons = {}
-        for position, difficulty in enumerate(Difficulty):
-            top = FIRST_BUTTON_TOP + position * (BUTTON_HEIGHT + BUTTON_GAP)
-            buttons[difficulty] = Button((left, top, BUTTON_WIDTH, BUTTON_HEIGHT),
-                                         LEVEL_NAMES[difficulty.value],
-                                         sublabel=self._record_text(difficulty))
-        return buttons
-
-    def _record_text(self, difficulty: Difficulty) -> str:
-        best = self.app.scores.get_best(difficulty)
-        if best is None:
-            return "Pas encore de record"
-        return f"Record : {best.time_left} s · {best.attempts} essais"
+    def _create_sections(self) -> list:
+        """Liste de (bouton, action) ; l'action est le nom d'une méthode de App."""
+        left = CENTER_X - SECTION_WIDTH // 2
+        sections = []
+        for position, (title, subtitle, icon, action) in enumerate(SECTIONS):
+            top = FIRST_SECTION_TOP + position * (SECTION_HEIGHT + SECTION_GAP)
+            button = SectionButton((left, top, SECTION_WIDTH, SECTION_HEIGHT), title,
+                                   subtitle=subtitle, icon=icon, title_size=32)
+            sections.append((button, action))
+        return sections
 
     def _create_characters(self) -> list:
         sprites = []
@@ -102,14 +101,10 @@ class MenuScreen(Screen):
     # ------------------------------------------------------------------
 
     def handle_event(self, event):
-        for difficulty, button in self._level_buttons.items():
+        for button, action in self._sections:
             if button.is_clicked(event):
-                self.app.start_game(difficulty)
+                getattr(self.app, action)()        # ex. self.app.show_levels()
                 return
-        if self._rules_button.is_clicked(event):
-            self.app.show_rules()
-        elif self._quit_button.is_clicked(event):
-            self.app.quit()
 
     def update(self, delta_seconds):
         self._time += delta_seconds
@@ -121,28 +116,18 @@ class MenuScreen(Screen):
         for sprite in self._sprites:
             sprite.draw(surface)
         self._draw_texts(surface)
-        for button in self._level_buttons.values():
-            button.draw(surface, self.app.fonts)
-        self._rules_button.draw(surface, self.app.fonts)
-        self._quit_button.draw(surface, self.app.fonts)
+        for button, _ in self._sections:
+            button.draw(surface, self.app.fonts, self.app.icons)
 
     def _draw_texts(self, surface):
         fonts = self.app.fonts
-        title_y = 105 + round(wave(self._time, 6, 3.0))     # le titre flotte
-        title = draw_text(surface, "DataOps Memory", fonts.get(68, bold=True), COLORS["title"],
-                          center=(CENTER_X + 45, title_y))
-        draw_database_icon(surface, (title.left - 55, title.centery), 70, COLORS["title"],
-                           COLORS["background_top"])
-
-        draw_text(surface, "Associez chaque incident à sa solution avant la fin du temps !",
-                  fonts.get(24), COLORS["text"], center=(CENTER_X, 180))
-
-        pulse = (wave(self._time, 0.5, 2.0) + 0.5)       # entre 0 et 1 : le texte « respire »
-        color = _mix(COLORS["text_muted"], COLORS["title"], pulse)
-        draw_text(surface, "Choisissez un niveau", fonts.get(22, bold=True), color,
-                  center=(CENTER_X, 232))
+        offset = round(wave(self._time, 6, 3.0))          # le titre flotte
+        if self._logo is not None:
+            surface.blit(self._logo, self._logo.get_rect(center=(CENTER_X, 92 + offset)))
+        else:                                              # logo absent : titre en texte
+            title = draw_text(surface, "DataOps Memory", fonts.get(68, bold=True),
+                              COLORS["title"], center=(CENTER_X + 45, 105 + offset))
+            draw_database_icon(surface, (title.left - 55, title.centery), 70, COLORS["title"],
+                               COLORS["background_top"])
 
 
-def _mix(color_a, color_b, ratio: float) -> tuple:
-    """Couleur intermédiaire entre color_a (ratio 0) et color_b (ratio 1)."""
-    return tuple(round(a + (b - a) * ratio) for a, b in zip(color_a, color_b))
