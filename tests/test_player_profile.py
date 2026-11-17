@@ -40,3 +40,11 @@ def test_invalid_pseudo_is_not_saved(tmp_path):
     with pytest.raises(InvalidPseudoError):
         profile.set_pseudo("   ")
     assert profile.pseudo == "Vanilla"
+
+
+@pytest.mark.parametrize("raw, code", [("", "empty"), ("x" * (MAX_PSEUDO_LENGTH + 1), "too_long"),
+                                       ("a/b", "characters")])
+def test_invalid_pseudo_error_gives_a_code_for_the_interface(raw, code):
+    with pytest.raises(InvalidPseudoError) as error:
+        clean_pseudo(raw)
+    assert error.value.code == code

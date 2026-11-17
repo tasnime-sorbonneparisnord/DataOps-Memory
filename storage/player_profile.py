@@ -8,18 +8,26 @@ ALLOWED_PSEUDO_CHARACTERS = set(string.ascii_letters + string.digits + " -_.'"
 
 
 class InvalidPseudoError(ValueError):
-    """Raised when a pseudo is empty, too long or contains forbidden characters."""
+    """Raised when a pseudo is empty, too long or contains forbidden characters.
+
+    `code` ("empty", "too_long" or "characters") lets the interface show the
+    message in the player's language.
+    """
+
+    def __init__(self, code: str, message: str):
+        super().__init__(message)
+        self.code = code
 
 
 def clean_pseudo(raw: str) -> str:
     """Returns the pseudo without extra spaces, or raises InvalidPseudoError."""
     pseudo = " ".join(raw.split())
     if not pseudo:
-        raise InvalidPseudoError("Le pseudo ne peut pas être vide.")
+        raise InvalidPseudoError("empty", "Le pseudo ne peut pas être vide.")
     if len(pseudo) > MAX_PSEUDO_LENGTH:
-        raise InvalidPseudoError(f"{MAX_PSEUDO_LENGTH} caractères maximum.")
+        raise InvalidPseudoError("too_long", f"{MAX_PSEUDO_LENGTH} caractères maximum.")
     if not set(pseudo) <= ALLOWED_PSEUDO_CHARACTERS:
-        raise InvalidPseudoError("Lettres, chiffres, espaces, - et _ seulement.")
+        raise InvalidPseudoError("characters", "Lettres, chiffres, espaces, - et _ seulement.")
     return pseudo
 
 

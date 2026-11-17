@@ -5,7 +5,6 @@ import pygame
 from game.enums import Difficulty
 from ui.screens.page import CENTER_X, MenuPage
 from ui.section_button import SectionButton
-from ui.settings import LEVEL_NAMES
 
 LEVEL_ICONS = {
     Difficulty.EASY: "coffee.png",
@@ -19,13 +18,13 @@ class LevelsScreen(MenuPage):
     """Un grand bouton doré par niveau ; un clic ouvre la présentation du niveau."""
 
     def __init__(self, app):
-        super().__init__(app, "Choisis ton niveau")
+        super().__init__(app, app.t("levels.title"))
         self._buttons = {}
         for position, difficulty in enumerate(Difficulty):
             top = FIRST_LEVEL_TOP + position * (LEVEL_HEIGHT + LEVEL_GAP)
             rect = pygame.Rect(CENTER_X - LEVEL_WIDTH // 2, top, LEVEL_WIDTH, LEVEL_HEIGHT)
             self._buttons[difficulty] = SectionButton(
-                rect, LEVEL_NAMES[difficulty.value], icon=LEVEL_ICONS[difficulty], title_size=46)
+                rect, app.t.level_name(difficulty), icon=LEVEL_ICONS[difficulty], title_size=46)
 
     def handle_page_event(self, event):
         for difficulty, button in self._buttons.items():

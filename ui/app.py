@@ -4,6 +4,7 @@ import pygame
 
 from game.memory_game import MemoryGame
 from ui.drawing import FontBook, draw_vertical_gradient
+from ui.i18n import Translator
 from ui.icons import IconLoader
 from ui.screens.cinematic_screen import CinematicScreen
 from ui.screens.credits_screen import CreditsScreen
@@ -29,20 +30,23 @@ class App:
     La logique du jeu (MemoryGame), les incidents, les scores, le profil du
     joueur et ses paramètres sont reçus de l'extérieur (injection de
     dépendances) : l'interface ne lit aucun fichier de données elle-même.
+
+    libraries associe une langue à sa bibliothèque d'incidents : {"fr": ..., "en": ...}.
     """
 
-    def __init__(self, library, scores, profile, settings):
+    def __init__(self, libraries, scores, profile, settings):
         pygame.init()
         self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption(WINDOW_TITLE)
         self.clock = pygame.time.Clock()
 
-        self.library = library
+        self.libraries = libraries
         self.scores = scores
         self.profile = profile
         self.settings = settings
+        self.t = Translator(settings)            # self.app.t("clé") donne le texte traduit
         self.sound = SoundManager(settings)
-        self.game = MemoryGame(library)
+        self.game = MemoryGame(self.library)
         self.fonts = FontBook()
         self.icons = IconLoader()
         self.background = self._create_background()
@@ -56,6 +60,11 @@ class App:
     # ------------------------------------------------------------------
     # Navigation entre les écrans (appelée par les écrans eux-mêmes)
     # ------------------------------------------------------------------
+
+    @property
+    def library(self):
+        """Les incidents dans la langue choisie (en français si la langue n'existe pas)."""
+        return self.libraries.get(self.settings.language, self.libraries["fr"])
 
     def show_pseudo(self):
         self._current = PseudoScreen(self)
@@ -86,6 +95,7 @@ class App:
         self._current = CreditsScreen(self)
 
     def start_game(self, difficulty):
+        self.game = MemoryGame(self.library)     # incidents dans la langue du moment
         self.game.start(difficulty)
         self._current = GameScreen(self)
 

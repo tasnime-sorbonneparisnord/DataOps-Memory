@@ -28,7 +28,7 @@ class MenuPage(Screen):
         self._background = self._create_background()
         self._back_button = None              # back_rect=None : page sans bouton « Retour »
         if back_rect is not None:
-            self._back_button = SectionButton(back_rect, "Retour", icon="menu_back.png",
+            self._back_button = SectionButton(back_rect, app.t("common.back"), icon="menu_back.png",
                                               title_size=30)
 
     def _create_background(self) -> pygame.Surface:

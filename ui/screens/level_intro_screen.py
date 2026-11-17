@@ -8,17 +8,13 @@ from ui.drawing import draw_text, wrap_text
 from ui.floating_sprite import FloatingSprite, load_image
 from ui.screens.page import CENTER_X, MenuPage
 from ui.section_button import SectionButton
-from ui.settings import LEVEL_NAMES
 
-# Pour chaque niveau : image, zone de texte dans la bulle (en fractions de l'image :
-# gauche, haut, largeur, hauteur) et petite phrase d'ambiance.
+# Pour chaque niveau : image et zone de texte dans la bulle, en fractions de l'image
+# (gauche, haut, largeur, hauteur). La phrase d'ambiance est la clé « intro.tagline.<niveau> ».
 LEVEL_INTROS = {
-    Difficulty.EASY: ("level_easy.png", (0.32, 0.14, 0.60, 0.40),
-                      "Parfait pour t'échauffer avant la vraie panne !"),
-    Difficulty.MEDIUM: ("level_medium.png", (0.38, 0.17, 0.54, 0.52),
-                        "La prod commence à chauffer : reste concentré !"),
-    Difficulty.HARD: ("level_hard.png", (0.27, 0.12, 0.64, 0.40),
-                      "Panne générale à 3 h du matin : garde ton sang-froid !"),
+    Difficulty.EASY: ("level_easy.png", (0.32, 0.14, 0.60, 0.40)),
+    Difficulty.MEDIUM: ("level_medium.png", (0.38, 0.17, 0.54, 0.52)),
+    Difficulty.HARD: ("level_hard.png", (0.27, 0.12, 0.64, 0.40)),
 }
 
 IMAGE_AREA = pygame.Rect(90, 135, 1100, 545)        # où l'image est posée
@@ -28,24 +24,24 @@ BUTTON_TOP, BUTTON_WIDTH, BUTTON_HEIGHT = 708, 320, 62
 MAX_FONT_SIZE, MIN_FONT_SIZE = 34, 16
 
 
-def level_description(difficulty: Difficulty) -> list:
-    """Les spécificités d'un niveau, calculées depuis sa configuration (aucun chiffre en dur)."""
+def level_description(difficulty: Difficulty, t) -> list:
+    """Les spécificités d'un niveau, calculées depuis sa configuration (aucun chiffre en dur).
+
+    t est le traducteur (Translator) : le texte suit la langue choisie.
+    """
     level = get_level(difficulty)
     lines = [
-        f"{level.incident_count} incidents à réparer",
-        f"{level.card_count} cartes · {level.time_limit} secondes",
+        t("intro.incidents", count=level.incident_count),
+        t("intro.cards", cards=level.card_count, seconds=level.time_limit),
     ]
     if level.special_count == 0:
-        lines.append("Aucune carte spéciale")
+        lines.append(t("intro.no_special"))
     else:
-        lines.append(f"{_cards(level.coffee_count, 'Café')} : +{level.effect_seconds} s")
-        lines.append(f"{_cards(level.critical_count, 'Critique')} : -{level.effect_seconds} s")
+        for key, count in (("intro.coffee", level.coffee_count),
+                           ("intro.critical", level.critical_count)):
+            lines.append(t(key, count=count, s="s" if count > 1 else "",
+                           seconds=level.effect_seconds))
     return lines
-
-
-def _cards(count: int, name: str) -> str:
-    plural = "s" if count > 1 else ""
-    return f"{count} carte{plural} {name}"
 
 
 class LevelIntroScreen(MenuPage):
@@ -53,12 +49,15 @@ class LevelIntroScreen(MenuPage):
 
     def __init__(self, app, difficulty: Difficulty):
         back_rect = (CENTER_X - BUTTON_WIDTH - 20, BUTTON_TOP, BUTTON_WIDTH, BUTTON_HEIGHT)
-        super().__init__(app, f"Niveau {LEVEL_NAMES[difficulty.value]}", back_rect=back_rect)
+        super().__init__(app, app.t("level.title", name=app.t.level_name(difficulty)),
+                         back_rect=back_rect)
         self._difficulty = difficulty
-        image_file, self._text_box, self._tagline = LEVEL_INTROS[difficulty]
-        self._lines = level_description(difficulty)
+        image_file, self._text_box = LEVEL_INTROS[difficulty]
+        self._tagline = app.t(f"intro.tagline.{difficulty.value}")
+        self._lines = level_description(difficulty, app.t)
         self._start_button = SectionButton((CENTER_X + 20, BUTTON_TOP, BUTTON_WIDTH, BUTTON_HEIGHT),
-                                           "C'est parti !", icon="menu_play.png", title_size=30)
+                                           app.t("intro.start"), icon="menu_play.png",
+                                           title_size=30)
         self._sprite, self._image_rect = self._create_sprite(image_file)
 
     def _create_sprite(self, image_file):

@@ -11,14 +11,15 @@ from ui.settings import COLORS, WINDOW_WIDTH
 
 CENTER_X = WINDOW_WIDTH // 2
 
-# Sections du menu, empilées au centre : (titre, sous-titre au survol, icône, action)
+# Sections du menu, empilées au centre : (clé du texte, icône, action)
+# Le titre est la clé « menu.play », le sous-titre au survol « menu.play.sub ».
 SECTIONS = [
-    ("Jouer", "Choisis ton niveau et sauve la prod", "menu_play.png", "show_levels"),
-    ("Comment jouer", "Les règles en une minute", "menu_rules.png", "show_rules"),
-    ("Meilleurs scores", "Tes records pour chaque niveau", "menu_scores.png", "show_scores"),
-    ("Paramètres", "Volume, luminosité et langue", "menu_settings.png", "show_settings"),
-    ("Crédits", "L'équipe et les sources du jeu", "menu_credits.png", "show_credits"),
-    ("Quitter", "À bientôt, d'astreinte !", "menu_quit.png", "quit"),
+    ("menu.play", "menu_play.png", "show_levels"),
+    ("menu.rules", "menu_rules.png", "show_rules"),
+    ("menu.scores", "menu_scores.png", "show_scores"),
+    ("menu.settings", "menu_settings.png", "show_settings"),
+    ("menu.credits", "menu_credits.png", "show_credits"),
+    ("menu.quit", "menu_quit.png", "quit"),
 ]
 SECTION_WIDTH, SECTION_HEIGHT, SECTION_GAP = 420, 62, 10
 FIRST_SECTION_TOP = 192
@@ -63,10 +64,10 @@ class MenuScreen(Screen):
         """Liste de (bouton, action) ; l'action est le nom d'une méthode de App."""
         left = CENTER_X - SECTION_WIDTH // 2
         sections = []
-        for position, (title, subtitle, icon, action) in enumerate(SECTIONS):
+        for position, (key, icon, action) in enumerate(SECTIONS):
             top = FIRST_SECTION_TOP + position * (SECTION_HEIGHT + SECTION_GAP)
-            button = SectionButton((left, top, SECTION_WIDTH, SECTION_HEIGHT), title,
-                                   subtitle=subtitle, icon=icon, title_size=32)
+            button = SectionButton((left, top, SECTION_WIDTH, SECTION_HEIGHT), self.app.t(key),
+                                   subtitle=self.app.t(f"{key}.sub"), icon=icon, title_size=32)
             sections.append((button, action))
         return sections
 
@@ -126,7 +127,7 @@ class MenuScreen(Screen):
         pseudo = self.app.profile.pseudo
         if not pseudo:
             return
-        label = render_gold_title(f"Salut, {pseudo} !", self.app.fonts.get(24))
+        label = render_gold_title(self.app.t("menu.hello", pseudo=pseudo), self.app.fonts.get(24))
         frame = label.get_rect().inflate(36, 22)
         frame.topright = (WINDOW_WIDTH - 24, 22)
         draw_gold_frame(surface, frame)

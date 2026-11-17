@@ -10,11 +10,11 @@ CINEMATIC_FPS = 12                       # images par seconde des fichiers frame
 SOUND_FILE = "cinematic.ogg"
 TYPING_SPEED = 30                        # lettres affichées par seconde
 
-# Sous-titres : (début, fin, texte, couleur), en secondes
+# Sous-titres : (début, fin, clé du texte, couleur), en secondes
 SUBTITLES = [
-    (0.3, 3.2, "3 h 06 du matin... tout est calme.", (255, 255, 255)),
-    (3.4, 5.6, "ALERTE : la prod est en panne !", (255, 90, 90)),
-    (5.8, 9.9, "À toi de jouer : répare les incidents !", (255, 206, 84)),
+    (0.3, 3.2, "cinematic.calm", (255, 255, 255)),
+    (3.4, 5.6, "cinematic.alert", (255, 90, 90)),
+    (5.8, 9.9, "cinematic.go", (255, 206, 84)),
 ]
 SUBTITLE_Y = WINDOW_HEIGHT - 70
 OUTLINE_COLOR = (10, 10, 20)
@@ -102,8 +102,9 @@ class CinematicScreen(Screen):
         return self._frame_image
 
     def _draw_subtitle(self, surface):
-        for start, end, text, color in SUBTITLES:
+        for start, end, key, color in SUBTITLES:
             if start <= self._time < end:
+                text = self.app.t(key)
                 letters = int((self._time - start) * TYPING_SPEED)   # effet machine à écrire
                 shown = text[:letters]
                 if shown:

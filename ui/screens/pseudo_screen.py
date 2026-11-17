@@ -21,11 +21,11 @@ class PseudoScreen(MenuPage):
     """
 
     def __init__(self, app):
-        super().__init__(app, "Ton pseudo", back_rect=None)
+        super().__init__(app, app.t("pseudo.title"), back_rect=None)
         self._text = app.profile.pseudo
         self._error = ""
         self._time = 0.0
-        self._validate_button = SectionButton(VALIDATE_RECT, "Valider", icon="menu_play.png",
+        self._validate_button = SectionButton(VALIDATE_RECT, app.t("pseudo.validate"), icon="menu_play.png",
                                               title_size=30)
 
     def handle_page_event(self, event):
@@ -44,7 +44,7 @@ class PseudoScreen(MenuPage):
         try:
             self.app.profile.set_pseudo(self._text)
         except InvalidPseudoError as error:
-            self._error = str(error)
+            self._error = self.app.t(f"pseudo.error.{error.code}", max=MAX_PSEUDO_LENGTH)
             return
         self.app.show_menu()
 
@@ -57,7 +57,7 @@ class PseudoScreen(MenuPage):
     def draw_content(self, surface):
         inner = draw_gold_frame(surface, PANEL_RECT)
         fonts = self.app.fonts
-        draw_text(surface, "Comment t'appelles-tu, data engineer ?", fonts.get(28), GOLD["text"],
+        draw_text(surface, self.app.t("pseudo.question"), fonts.get(28), GOLD["text"],
                   center=(inner.centerx, inner.top + 50))
 
         pygame.draw.rect(surface, GOLD["text"], INPUT_RECT, border_radius=10)
@@ -72,6 +72,6 @@ class PseudoScreen(MenuPage):
         if self._error:
             message, color = self._error, ERROR_COLOR
         else:
-            message, color = f"{MAX_PSEUDO_LENGTH} caractères maximum · Entrée pour valider", GOLD["muted"]
+            message, color = self.app.t("pseudo.hint", max=MAX_PSEUDO_LENGTH), GOLD["muted"]
         draw_text(surface, message, fonts.get(20), color, center=(inner.centerx, inner.bottom - 50))
         self._validate_button.draw(surface, fonts, self.app.icons)

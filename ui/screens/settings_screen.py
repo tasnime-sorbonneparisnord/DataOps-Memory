@@ -11,14 +11,14 @@ PANEL_RECT = pygame.Rect(CENTER_X - 420, 150, 840, 500)
 ROW_TOP, ROW_HEIGHT = PANEL_RECT.top + 70, 110
 SLIDER_LEFT, SLIDER_WIDTH = PANEL_RECT.left + 380, 430
 LANGUAGE_BUTTON_WIDTH, LANGUAGE_BUTTON_HEIGHT = 190, 52
-LANGUAGES = [("fr", "Français"), ("en", "English")]
+LANGUAGES = [("fr", "Français"), ("en", "English")]     # chaque langue écrite dans sa langue
 
 
 class SettingsScreen(MenuPage):
     """Chaque réglage s'applique tout de suite ; tout est sauvegardé en quittant la page."""
 
     def __init__(self, app):
-        super().__init__(app, "Paramètres")
+        super().__init__(app, app.t("settings.title"))
         settings = app.settings
         rows = [
             ("music_volume", self._on_music_change),
@@ -76,10 +76,10 @@ class SettingsScreen(MenuPage):
     def draw_content(self, surface):
         draw_gold_frame(surface, PANEL_RECT)
         rows = [
-            ("settings_volume.png", "Musique"),
-            ("settings_volume.png", "Effets sonores"),
-            ("settings_brightness.png", "Luminosité"),
-            ("settings_language.png", "Langue"),
+            ("settings_volume.png", self.app.t("settings.music")),
+            ("settings_volume.png", self.app.t("settings.effects")),
+            ("settings_brightness.png", self.app.t("settings.brightness")),
+            ("settings_language.png", self.app.t("settings.language")),
         ]
         for number, (icon_file, name) in enumerate(rows):
             y = ROW_TOP + number * ROW_HEIGHT

@@ -13,6 +13,7 @@ FPS = 60
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = PROJECT_DIR / "data"
 INCIDENTS_FILE = DATA_DIR / "incidents.json"
+INCIDENTS_EN_FILE = DATA_DIR / "incidents_en.json"
 SCORES_FILE = DATA_DIR / "best_scores.json"
 PLAYER_FILE = DATA_DIR / "player.json"
 SETTINGS_FILE = DATA_DIR / "settings.json"
@@ -77,10 +78,3 @@ MESSAGE_DURATION = 1.6    # durée d'affichage d'un message (carte spéciale, et
 SPECIAL_FLASH_DURATION = 0.8   # durée d'affichage d'une carte spéciale retournée
 END_DELAY = 1.0           # pause avant l'écran de fin
 
-LEVEL_NAMES = {"easy": "Facile", "medium": "Moyen", "hard": "Difficile"}
-THEME_NAMES = {
-    "database": "Base de données",
-    "network": "Réseau",
-    "cloud": "Cloud",
-    "pipeline": "Pipeline",
-}

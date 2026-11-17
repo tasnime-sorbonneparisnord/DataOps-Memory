@@ -12,7 +12,7 @@ from ui.grid_layout import GridLayout
 from ui.hud import (HUD_COLORS, RoundButton, draw_effect_badge, draw_player_bar,
                     draw_progress_bar, draw_stat_panel)
 from ui.screens.base import Screen
-from ui.settings import (COLORS, END_DELAY, LEVEL_NAMES, MESSAGE_DURATION, MISMATCH_DELAY,
+from ui.settings import (COLORS, END_DELAY, MESSAGE_DURATION, MISMATCH_DELAY,
                          SPECIAL_FLASH_DURATION, WINDOW_WIDTH)
 
 LOW_TIME_SECONDS = 10
@@ -90,7 +90,7 @@ class GameScreen(Screen):
         self.app.sound.play("match")
         pair = self._pair_indices(index)
         self._match_effects.append(MatchEffect(pair, [self._layout.rect_of(i) for i in pair]))
-        self._show_message("Incident réparé !", COLORS["success"],
+        self._show_message(self.app.t("game.fixed"), COLORS["success"],
                            detail=self.game.last_explanation, duration=EXPLANATION_DURATION)
 
     def _pair_indices(self, index) -> list:
@@ -108,9 +108,9 @@ class GameScreen(Screen):
         self._flashing[index] = SPECIAL_FLASH_DURATION
         self.app.sound.play("coffee" if seconds > 0 else "critical")
         if seconds > 0:
-            self._show_message(f"Pause café ! +{seconds} s", COLORS["success"])
+            self._show_message(self.app.t("game.coffee", seconds=seconds), COLORS["success"])
         else:
-            self._show_message(f"Incident critique ! −{-seconds} s", COLORS["danger"])
+            self._show_message(self.app.t("game.critical", seconds=-seconds), COLORS["danger"])
 
     def _show_message(self, text, color, detail="", duration=MESSAGE_DURATION):
         self._message = (text, color, duration, detail)
@@ -181,15 +181,17 @@ class GameScreen(Screen):
 
     def _draw_left_column(self, surface):
         fonts = self.app.fonts
-        level_name = f"Niveau {LEVEL_NAMES[self.game.difficulty.value]}"
-        draw_player_bar(surface, (LEFT_X, 18), fonts, self.app.profile.pseudo, level_name)
+        t = self.app.t
+        level_name = t("level.title", name=t.level_name(self.game.difficulty))
+        draw_player_bar(surface, (LEFT_X, 18), fonts,
+                        self.app.profile.pseudo or t("common.player"), level_name)
 
         best = self.app.scores.get_best(self.game.difficulty)
         panels = [
-            ("Temps", format_time(self.game.remaining_time), self._time_color(), ""),
-            ("Essais", str(self.game.attempts), None, ""),
-            ("Record", f"{best.time_left} s" if best else "—", None,
-             f"{best.attempts} essais" if best else "à battre !"),
+            (t("game.time"), format_time(self.game.remaining_time), self._time_color(), ""),
+            (t("game.attempts"), str(self.game.attempts), None, ""),
+            (t("game.record"), f"{best.time_left} s" if best else "—", None,
+             t("game.record_detail", count=best.attempts) if best else t("game.to_beat")),
         ]
         for number, (title, value, color, detail) in enumerate(panels):
             top = STAT_PANELS_TOP + number * (STAT_PANEL_HEIGHT + STAT_PANEL_GAP)
@@ -226,9 +228,9 @@ class GameScreen(Screen):
 
     def _draw_right_column(self, surface):
         fonts, level = self.app.fonts, self.game.level
-        box = draw_stat_panel(surface, MISSION_RECT, fonts, "Mission",
+        box = draw_stat_panel(surface, MISSION_RECT, fonts, self.app.t("game.mission"),
                               f"{self.game.resolved_count} / {level.incident_count}",
-                              detail="incidents réparés")
+                              detail=self.app.t("game.fixed_count"))
         draw_progress_bar(surface, (MISSION_RECT.left + 18, MISSION_RECT.bottom + 14,
                                     COLUMN_WIDTH - 36, 16),
                           self.game.resolved_count, level.incident_count)

@@ -100,11 +100,25 @@ def test_card_style_of_special_cards_shows_their_effect():
 
 # --- Présentation des niveaux -------------------------------------------------
 
+def french():
+    from types import SimpleNamespace
+
+    from ui.i18n import Translator
+    return Translator(SimpleNamespace(language="fr"))
+
+
+def english():
+    from types import SimpleNamespace
+
+    from ui.i18n import Translator
+    return Translator(SimpleNamespace(language="en"))
+
+
 def test_level_description_of_easy_level_has_no_special_card():
     from game.enums import Difficulty
     from ui.screens.level_intro_screen import level_description
 
-    lines = level_description(Difficulty.EASY)
+    lines = level_description(Difficulty.EASY, french())
 
     assert lines[0] == "4 incidents à réparer"
     assert "Aucune carte spéciale" in lines
@@ -114,10 +128,49 @@ def test_level_description_of_hard_level_lists_special_cards():
     from game.enums import Difficulty
     from ui.screens.level_intro_screen import level_description
 
-    lines = level_description(Difficulty.HARD)
+    lines = level_description(Difficulty.HARD, french())
 
     assert "2 cartes Café : +10 s" in lines
     assert "2 cartes Critique : -10 s" in lines
+
+
+def test_level_description_follows_the_language():
+    from game.enums import Difficulty
+    from ui.screens.level_intro_screen import level_description
+
+    assert level_description(Difficulty.MEDIUM, english())[2] == "1 Coffee card: +10 s"
+
+
+# --- Traduction ---------------------------------------------------------------
+
+def test_every_french_text_has_an_english_version():
+    from ui.i18n import TEXTS
+
+    assert set(TEXTS["fr"]) == set(TEXTS["en"])
+
+
+def test_translator_fills_values_and_follows_the_settings():
+    from types import SimpleNamespace
+
+    from ui.i18n import Translator
+
+    settings = SimpleNamespace(language="fr")
+    t = Translator(settings)
+    assert t("menu.hello", pseudo="Vanilla") == "Salut, Vanilla !"
+
+    settings.language = "en"                    # la langue change : le texte suit
+    assert t("menu.hello", pseudo="Vanilla") == "Hi, Vanilla!"
+
+
+def test_english_incidents_match_the_french_ones():
+    from storage.incident_library import IncidentLibrary
+    from ui.settings import INCIDENTS_EN_FILE, INCIDENTS_FILE
+    import json
+
+    french_ids = [entry["pair_id"] for entry in json.load(open(INCIDENTS_FILE, encoding="utf-8"))]
+    english_ids = [entry["pair_id"] for entry in json.load(open(INCIDENTS_EN_FILE, encoding="utf-8"))]
+    assert french_ids == english_ids
+    assert len(IncidentLibrary.from_json(INCIDENTS_EN_FILE)) == len(french_ids)
 
 
 # --- Animations ---------------------------------------------------------------

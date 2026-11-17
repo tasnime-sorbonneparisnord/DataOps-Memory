@@ -18,7 +18,6 @@ SPLASH_COLORS = {
     "hint": (225, 228, 245),
 }
 
-SLOGAN = "Trouve la paire, répare le serveur !"
 
 RIGHT_CENTER_X = 875       # centre de la zone à droite des personnages
 LOGO_HEIGHT = 265
@@ -61,7 +60,7 @@ class SplashScreen(Screen):
         return pygame.transform.rotozoom(logo, 3, 1)     # légèrement penché, plus dynamique
 
     def _create_welcome(self) -> pygame.Surface:
-        return render_outlined_text("Bienvenue dans DataOps Memory !",
+        return render_outlined_text(self.app.t("splash.welcome"),
                                     self.app.fonts.display(46), SPLASH_COLORS["welcome"],
                                     [(SPLASH_COLORS["logo_outline"], 5)])
 
@@ -97,9 +96,9 @@ class SplashScreen(Screen):
         scale = 1 + wave(self._time, 0.04, 1.6)
         welcome = pygame.transform.rotozoom(self._welcome, 0, scale)
         surface.blit(welcome, welcome.get_rect(center=(RIGHT_CENTER_X, 440)))
-        draw_text(surface, SLOGAN, self.app.fonts.get(30), SPLASH_COLORS["slogan"],
+        draw_text(surface, self.app.t("splash.slogan"), self.app.fonts.get(30), SPLASH_COLORS["slogan"],
                   center=(RIGHT_CENTER_X, 500))
 
         if int(self._time * 2) % 2 == 0:            # clignote deux fois par seconde
-            draw_text(surface, "Clique pour continuer", self.app.fonts.get(26),
+            draw_text(surface, self.app.t("splash.continue"), self.app.fonts.get(26),
                       SPLASH_COLORS["hint"], center=(RIGHT_CENTER_X, 620))

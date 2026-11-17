@@ -10,7 +10,7 @@ from ui.gold_style import GOLD, draw_gold_frame, render_gold_title
 from ui.screens.game_screen import format_time
 from ui.screens.base import Screen
 from ui.section_button import SectionButton
-from ui.settings import LEVEL_NAMES, WINDOW_HEIGHT, WINDOW_WIDTH
+from ui.settings import WINDOW_HEIGHT, WINDOW_WIDTH
 
 CENTER_X = WINDOW_WIDTH // 2
 BANNER_RECT = pygame.Rect(40, 28, WINDOW_WIDTH - 80, 78)
@@ -71,10 +71,10 @@ class EndScreen(Screen):
     def _create_buttons(self) -> list:
         """Liste de (bouton, touche, action)."""
         actions = [
-            ("Rejouer", "menu_play.png", pygame.K_r,
+            (self.app.t("end.replay"), "menu_play.png", pygame.K_r,
              lambda: self.app.fade_to(lambda: self.app.start_game(self._result.difficulty))),
-            ("Niveaux", "menu_rules.png", pygame.K_n, self.app.show_levels),
-            ("Accueil", "menu_back.png", pygame.K_ESCAPE, self.app.show_menu),
+            (self.app.t("end.levels"), "menu_rules.png", pygame.K_n, self.app.show_levels),
+            (self.app.t("end.home"), "menu_back.png", pygame.K_ESCAPE, self.app.show_menu),
         ]
         buttons = []
         first_left = CENTER_X - (3 * BUTTON_WIDTH + 2 * BUTTON_GAP) // 2
@@ -138,8 +138,8 @@ class EndScreen(Screen):
     # ------------------------------------------------------------------
 
     def _title(self) -> str:
-        pseudo = self.app.profile.pseudo or "Le joueur"
-        return f"{pseudo} sauve la prod !" if self._result.won else "La prod est toujours en panne..."
+        pseudo = self.app.profile.pseudo or self.app.t("end.default_player")
+        return self.app.t("end.win", pseudo=pseudo) if self._result.won else self.app.t("end.lose")
 
     def _draw_banner(self, surface):
         banner = pygame.Surface(BANNER_RECT.size)
@@ -170,7 +170,7 @@ class EndScreen(Screen):
         result, fonts = self._result, self.app.fonts
         inner = draw_gold_frame(surface, CARD_RECT)
 
-        ribbon_text = "Victoire" if result.won else "Défaite"
+        ribbon_text = self.app.t("end.victory" if result.won else "end.defeat")
         ribbon_color = END_COLORS["win" if result.won else "lose"]
         ribbon = render_outlined_text(ribbon_text.upper(), fonts.get(36), ribbon_color,
                                       [((14, 16, 40), 3)])
@@ -178,9 +178,9 @@ class EndScreen(Screen):
         draw_gold_frame(surface, ribbon_box)
         surface.blit(ribbon, ribbon.get_rect(center=ribbon_box.center))
 
-        name = render_gold_title(self.app.profile.pseudo or "Joueur", fonts.get(40))
+        name = render_gold_title(self.app.profile.pseudo or self.app.t("common.player"), fonts.get(40))
         surface.blit(name, name.get_rect(midleft=(inner.left + 26, inner.top + 58)))
-        level = f"Niveau {LEVEL_NAMES[result.difficulty.value]}"
+        level = self.app.t("level.title", name=self.app.t.level_name(result.difficulty))
         draw_text(surface, level.upper(), fonts.get(22), END_COLORS["stat_title"],
                   midleft=(inner.left + 28, inner.top + 96))
         pygame.draw.line(surface, GOLD["frame"], (inner.left + 20, inner.top + 120),
@@ -195,18 +195,19 @@ class EndScreen(Screen):
             surface.blit(value_image, value_image.get_rect(midright=(inner.right - 28, y)))
 
         if self._is_record and int(self._time * 2) % 2 == 0:      # clignote
-            draw_text(surface, "Nouveau record !", fonts.get(32), END_COLORS["win"],
+            draw_text(surface, self.app.t("end.new_record"), fonts.get(32), END_COLORS["win"],
                       center=(inner.centerx, inner.bottom - 28))
 
     def _stats(self) -> list:
         """Les lignes de la carte : (titre, valeur)."""
         result, game = self._result, self.app.game
         best = self.app.scores.get_best(result.difficulty)
-        record_label = f"Record ({best.attempts} essais)" if best else "Record"
+        t = self.app.t
+        record_label = t("end.record_with", count=best.attempts) if best else t("end.record")
         record = f"{best.time_left} s" if best else "—"
         return [
-            ("Temps restant", format_time(result.time_left)),
-            ("Essais", str(result.attempts)),
-            ("Incidents réparés", f"{game.resolved_count} / {game.level.incident_count}"),
+            (t("end.time_left"), format_time(result.time_left)),
+            (t("end.attempts"), str(result.attempts)),
+            (t("end.fixed"), f"{game.resolved_count} / {game.level.incident_count}"),
             (record_label, record),
         ]
