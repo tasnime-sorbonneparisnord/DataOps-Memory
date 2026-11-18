@@ -72,7 +72,7 @@ class EndScreen(Screen):
         """Liste de (bouton, touche, action)."""
         actions = [
             (self.app.t("end.replay"), "menu_play.png", pygame.K_r,
-             lambda: self.app.fade_to(lambda: self.app.start_game(self._result.difficulty))),
+             lambda: self.app.fade_to(self.app.replay)),
             (self.app.t("end.levels"), "menu_rules.png", pygame.K_n, self.app.show_levels),
             (self.app.t("end.home"), "menu_back.png", pygame.K_ESCAPE, self.app.show_menu),
         ]
