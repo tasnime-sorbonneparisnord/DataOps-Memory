@@ -46,7 +46,8 @@ class App:
         self.settings = settings
         self.t = Translator(settings)            # self.app.t("clé") donne le texte traduit
         self.sound = SoundManager(settings)
-        self.game = MemoryGame(self.library)
+        self._game_library = self.library
+        self.game = MemoryGame(self._game_library)
         self.fonts = FontBook()
         self.icons = IconLoader()
         self.background = self._create_background()
@@ -95,8 +96,17 @@ class App:
         self._current = CreditsScreen(self)
 
     def start_game(self, difficulty):
-        self.game = MemoryGame(self.library)     # incidents dans la langue du moment
+        self._game_library = self.library        # incidents dans la langue du moment
+        self.game = MemoryGame(self._game_library)
         self.game.start(difficulty)
+        self._current = GameScreen(self)
+
+    def replay(self):
+        """Rejouer le même niveau : game.restart(), sauf si la langue a changé entre-temps."""
+        if self._game_library is not self.library:
+            self.start_game(self.game.difficulty)
+            return
+        self.game.restart()
         self._current = GameScreen(self)
 
     def show_end(self, result):
