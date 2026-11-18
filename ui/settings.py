@@ -63,10 +63,6 @@ COLORS = {
 FONT_NAMES = "arialroundedmtbold,arial,helvetica,dejavusans"
 
 # Mise en page de l'écran de jeu (en pixels)
-MARGIN = 40
-HEADER_HEIGHT = 110
-GRID_AREA_WIDTH = 860
-SIDE_PANEL_WIDTH = 310
 CARD_GAP = 14
 CARD_MAX_WIDTH = 180
 CARD_RATIO = 1.3          # hauteur = largeur x 1,3

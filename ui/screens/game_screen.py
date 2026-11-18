@@ -228,9 +228,9 @@ class GameScreen(Screen):
 
     def _draw_right_column(self, surface):
         fonts, level = self.app.fonts, self.game.level
-        box = draw_stat_panel(surface, MISSION_RECT, fonts, self.app.t("game.mission"),
-                              f"{self.game.resolved_count} / {level.incident_count}",
-                              detail=self.app.t("game.fixed_count"))
+        draw_stat_panel(surface, MISSION_RECT, fonts, self.app.t("game.mission"),
+                        f"{self.game.resolved_count} / {level.incident_count}",
+                        detail=self.app.t("game.fixed_count"))
         draw_progress_bar(surface, (MISSION_RECT.left + 18, MISSION_RECT.bottom + 14,
                                     COLUMN_WIDTH - 36, 16),
                           self.game.resolved_count, level.incident_count)
