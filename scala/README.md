@@ -50,7 +50,7 @@ scala-cli run scala --main-class dataops.quality.runQualityTests
 | `src/Main.scala` | lecture des fichiers et affichage : les effets de bord sont regroupés ici |
 | `tests/ContentChecksTest.scala` | 10 tests avec `assert` |
 
-## Notions du chapitre 5 appliquées
+## Notions appliquées
 
 - **Immutabilité** : `val` partout, `case class` immuables, collections immuables
   (`List`, `Set`, `Map`). La seule variable (`var position`) est enfermée dans le
