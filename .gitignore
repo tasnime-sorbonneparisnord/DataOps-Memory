@@ -19,3 +19,4 @@ data/settings.json
 *.code-workspace
 .scala-build/
 .bsp/
+.DS_Store
