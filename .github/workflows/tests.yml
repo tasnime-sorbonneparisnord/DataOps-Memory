@@ -30,3 +30,17 @@ jobs:
 
       - name: Run tests
         run: python -m pytest -v
+
+  scala:
+    # Extension Scala : contrôle qualité des incidents (fr et en) et ses tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: VirtusLab/scala-cli-setup@v1
+
+      - name: Run Scala tests
+        run: scala-cli run scala --main-class dataops.quality.runQualityTests
+
+      - name: Check the incident files
+        run: scala-cli run scala --main-class dataops.quality.checkIncidents

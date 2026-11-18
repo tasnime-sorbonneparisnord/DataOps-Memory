@@ -16,3 +16,4 @@ __pycache__/
 data/best_scores.json
 data/player.json
 data/settings.json
+*.code-workspace
