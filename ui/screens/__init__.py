@@ -1,0 +1,1 @@
+"""Les écrans du jeu : menu, règles, partie et fin."""

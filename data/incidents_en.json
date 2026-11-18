@@ -1,0 +1,218 @@
+[
+  {
+    "pair_id": "DB-01",
+    "theme": "database",
+    "incident": "Disk full",
+    "solution": "Purge old logs",
+    "explanation": "Logs pile up and fill the disk: archive or delete the oldest ones.",
+    "incident_icon": "database_incident.png",
+    "solution_icon": "database_solution.png"
+  },
+  {
+    "pair_id": "DB-02",
+    "theme": "database",
+    "incident": "Database down",
+    "solution": "Restart the service",
+    "explanation": "A crashed database service is restarted before analysing the cause.",
+    "incident_icon": "database_incident.png",
+    "solution_icon": "database_solution.png"
+  },
+  {
+    "pair_id": "DB-03",
+    "theme": "database",
+    "incident": "Query too slow",
+    "solution": "Add an index",
+    "explanation": "An index avoids scanning the whole table for every query.",
+    "incident_icon": "database_incident.png",
+    "solution_icon": "database_solution.png"
+  },
+  {
+    "pair_id": "DB-04",
+    "theme": "database",
+    "incident": "Corrupted data",
+    "solution": "Restore the backup",
+    "explanation": "A recent backup lets you go back to a healthy state.",
+    "incident_icon": "database_incident.png",
+    "solution_icon": "database_solution.png"
+  },
+  {
+    "pair_id": "DB-05",
+    "theme": "database",
+    "incident": "Too many connections",
+    "solution": "Connection pool",
+    "explanation": "A pool reuses a limited number of connections instead of opening new ones endlessly.",
+    "incident_icon": "database_incident.png",
+    "solution_icon": "database_solution.png"
+  },
+  {
+    "pair_id": "DB-06",
+    "theme": "database",
+    "incident": "Duplicate rows",
+    "solution": "Unique constraint",
+    "explanation": "A UNIQUE constraint prevents inserting the same row twice.",
+    "incident_icon": "database_incident.png",
+    "solution_icon": "database_solution.png"
+  },
+  {
+    "pair_id": "NET-01",
+    "theme": "network",
+    "incident": "Site unreachable",
+    "solution": "Check the DNS",
+    "explanation": "If the domain name no longer resolves, the site looks offline.",
+    "incident_icon": "network_incident.png",
+    "solution_icon": "network_solution.png"
+  },
+  {
+    "pair_id": "NET-02",
+    "theme": "network",
+    "incident": "High latency",
+    "solution": "Enable a CDN",
+    "explanation": "A CDN serves content from servers close to the users.",
+    "incident_icon": "network_incident.png",
+    "solution_icon": "network_solution.png"
+  },
+  {
+    "pair_id": "NET-03",
+    "theme": "network",
+    "incident": "Port blocked",
+    "solution": "Open the firewall",
+    "explanation": "A firewall rule must allow the port used by the service.",
+    "incident_icon": "network_incident.png",
+    "solution_icon": "network_solution.png"
+  },
+  {
+    "pair_id": "NET-04",
+    "theme": "network",
+    "incident": "Certificate expired",
+    "solution": "Renew the certificate",
+    "explanation": "An expired TLS certificate blocks secure HTTPS connections.",
+    "incident_icon": "network_incident.png",
+    "solution_icon": "network_solution.png"
+  },
+  {
+    "pair_id": "NET-05",
+    "theme": "network",
+    "incident": "DDoS attack",
+    "solution": "Rate limiting",
+    "explanation": "Rate limiting filters out the flood of malicious requests.",
+    "incident_icon": "network_incident.png",
+    "solution_icon": "network_solution.png"
+  },
+  {
+    "pair_id": "NET-06",
+    "theme": "network",
+    "incident": "Packet loss",
+    "solution": "Replace the cable",
+    "explanation": "A faulty cable or port makes network packets get lost.",
+    "incident_icon": "network_incident.png",
+    "solution_icon": "network_solution.png"
+  },
+  {
+    "pair_id": "CLD-01",
+    "theme": "cloud",
+    "incident": "Server overloaded",
+    "solution": "Add instances",
+    "explanation": "Horizontal scaling spreads the load across several machines.",
+    "incident_icon": "cloud_incident.png",
+    "solution_icon": "cloud_solution.png"
+  },
+  {
+    "pair_id": "CLD-02",
+    "theme": "cloud",
+    "incident": "Exploding bill",
+    "solution": "Shut down unused resources",
+    "explanation": "Machines left running by mistake cost a lot and produce nothing.",
+    "incident_icon": "cloud_incident.png",
+    "solution_icon": "cloud_solution.png"
+  },
+  {
+    "pair_id": "CLD-03",
+    "theme": "cloud",
+    "incident": "Container crash loop",
+    "solution": "Read the logs",
+    "explanation": "A container that keeps restarting usually explains the error in its logs.",
+    "incident_icon": "cloud_incident.png",
+    "solution_icon": "cloud_solution.png"
+  },
+  {
+    "pair_id": "CLD-04",
+    "theme": "cloud",
+    "incident": "API key exposed",
+    "solution": "Revoke the key",
+    "explanation": "A published key must be revoked and replaced immediately.",
+    "incident_icon": "cloud_incident.png",
+    "solution_icon": "cloud_solution.png"
+  },
+  {
+    "pair_id": "CLD-05",
+    "theme": "cloud",
+    "incident": "Memory full",
+    "solution": "Add more RAM",
+    "explanation": "A service that runs out of memory gets killed: it needs more RAM.",
+    "incident_icon": "cloud_incident.png",
+    "solution_icon": "cloud_solution.png"
+  },
+  {
+    "pair_id": "CLD-06",
+    "theme": "cloud",
+    "incident": "Region down",
+    "solution": "Fail over to another region",
+    "explanation": "A multi-region setup lets the service start again elsewhere during an outage.",
+    "incident_icon": "cloud_incident.png",
+    "solution_icon": "cloud_solution.png"
+  },
+  {
+    "pair_id": "PIP-01",
+    "theme": "pipeline",
+    "incident": "ETL job failed",
+    "solution": "Rerun the job",
+    "explanation": "Once the cause is fixed, the job is rerun on the missing data.",
+    "incident_icon": "pipeline_incident.png",
+    "solution_icon": "pipeline_solution.png"
+  },
+  {
+    "pair_id": "PIP-02",
+    "theme": "pipeline",
+    "incident": "Schema changed",
+    "solution": "Update the mapping",
+    "explanation": "A column renamed at the source breaks the pipeline until the mapping is updated.",
+    "incident_icon": "pipeline_incident.png",
+    "solution_icon": "pipeline_solution.png"
+  },
+  {
+    "pair_id": "PIP-03",
+    "theme": "pipeline",
+    "incident": "Missing values",
+    "solution": "Validation rules",
+    "explanation": "Quality checks catch empty fields before the data is loaded.",
+    "incident_icon": "pipeline_incident.png",
+    "solution_icon": "pipeline_solution.png"
+  },
+  {
+    "pair_id": "PIP-04",
+    "theme": "pipeline",
+    "incident": "Pipeline too slow",
+    "solution": "Parallelise tasks",
+    "explanation": "Processing partitions in parallel cuts the total time.",
+    "incident_icon": "pipeline_incident.png",
+    "solution_icon": "pipeline_solution.png"
+  },
+  {
+    "pair_id": "PIP-05",
+    "theme": "pipeline",
+    "incident": "Late data",
+    "solution": "Alert the team",
+    "explanation": "A freshness alert warns you when the data does not arrive on time.",
+    "incident_icon": "pipeline_incident.png",
+    "solution_icon": "pipeline_solution.png"
+  },
+  {
+    "pair_id": "PIP-06",
+    "theme": "pipeline",
+    "incident": "Source file missing",
+    "solution": "Check the ingestion",
+    "explanation": "If the file was not dropped off, the upstream ingestion step is to blame.",
+    "incident_icon": "pipeline_incident.png",
+    "solution_icon": "pipeline_solution.png"
+  }
+]
