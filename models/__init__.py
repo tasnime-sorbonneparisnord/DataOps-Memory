@@ -7,9 +7,12 @@ from models.card import (
     SolutionCard,
 )
 
-from models.card_effect import (
+from models.effect import (
     CardEffect,
     NO_EFFECT,
+)
+
+from models.special_card import (
     SpecialCard,
     CoffeeCard,
     CriticalCard,

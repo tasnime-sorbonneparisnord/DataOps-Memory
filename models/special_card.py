@@ -1,15 +1,6 @@
 
 from models.card import Card
-from models.effect import CardEffect, DEFAULT_EFFECT_SECONDS, NO_EFFECT
-
-__all__ = [
-    "CardEffect",
-    "DEFAULT_EFFECT_SECONDS",
-    "NO_EFFECT",
-    "SpecialCard",
-    "CoffeeCard",
-    "CriticalCard",
-]
+from models.effect import CardEffect, DEFAULT_EFFECT_SECONDS
 
 
 class SpecialCard(Card):
@@ -35,7 +26,7 @@ class SpecialCard(Card):
         return self.title
 
     def activate(self) -> CardEffect:
-        """Returns the time effect of the card (polymorphism)."""
+        """Returns the time effect of the card."""
         return self.effect
 
     def is_special(self) -> bool:

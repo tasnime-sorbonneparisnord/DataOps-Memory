@@ -3,7 +3,7 @@
 import pygame
 
 from models.card import CardState, IncidentCard, SolutionCard
-from models.card_effect import CoffeeCard, CriticalCard
+from models.special_card import CoffeeCard, CriticalCard
 from ui.drawing import draw_database_icon, draw_text, draw_wrapped_text, line_height
 from ui.settings import COLORS, CORNER_RADIUS
 

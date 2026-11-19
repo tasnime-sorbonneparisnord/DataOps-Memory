@@ -21,15 +21,4 @@ class CardEffect:
         """Tells whether the effect changes the timer."""
         return self.seconds_delta != 0
 
-    def get_description(self) -> str:
-        """Returns a readable description of the effect."""
-        if not self.has_effect():
-            return "No effect."
-
-        if self.seconds_delta > 0:
-            return f"Adds {self.seconds_delta} seconds."
-
-        return f"Removes {abs(self.seconds_delta)} seconds."
-
-
 NO_EFFECT = CardEffect(seconds_delta=0)

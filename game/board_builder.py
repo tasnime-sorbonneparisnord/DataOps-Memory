@@ -3,8 +3,7 @@ import random
 
 from game.levels import LevelConfig
 from models.board import Board
-from models.card_effect import CoffeeCard, CriticalCard
-
+from models.special_card import CoffeeCard, CriticalCard
 
 def build_board(pairs: list, level: LevelConfig, rng: random.Random = None) -> Board:
     """Creates the shuffled board of a level from the drawn incident pairs.
