@@ -4,7 +4,7 @@ import pygame
 import pytest
 
 from models.card import IncidentCard, SolutionCard
-from models.card_effect import CoffeeCard, CriticalCard
+from models.special_card import CoffeeCard, CriticalCard
 from ui.card_renderer import card_style
 from ui.drawing import wrap_text
 from ui.grid_layout import GridLayout

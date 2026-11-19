@@ -122,13 +122,15 @@ def test_draw_too_many_pairs_raises():
 def test_each_draw_creates_new_hidden_cards():
     library = IncidentLibrary(make_entries(1))
     first = library.draw(1)[0]
-    first.mark_as_matched()
+
+    first.incident.mark_as_matched()
+    first.solution.mark_as_matched()
 
     second = library.draw(1)[0]
 
-    assert not second.is_matched()
-
-
+    assert not second.incident.is_matched()
+    assert not second.solution.is_matched()
+    
 def test_duplicate_pair_ids_rejected():
     entries = make_entries(2) + make_entries(1)
 
