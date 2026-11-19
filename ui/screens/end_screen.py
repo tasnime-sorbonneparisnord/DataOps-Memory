@@ -35,7 +35,9 @@ END_COLORS = {
     "win": (255, 206, 84),
     "lose": (232, 84, 96),
     "stat_title": (64, 210, 240),
+    "outline": (14, 16, 40),
 }
+TEXT_OUTLINE = [(END_COLORS["outline"], 3)]       # contour bleu foncé de 3 pixels autour du texte
 CONFETTI_COLORS = [(255, 206, 84), (64, 210, 240), (232, 84, 96), (120, 220, 120), (180, 120, 255)]
 CONFETTI_COUNT = 70
 
@@ -150,7 +152,7 @@ class EndScreen(Screen):
             pygame.draw.line(banner, color, (x, 0), (x, BANNER_RECT.height))
         surface.blit(banner, BANNER_RECT)
         title = render_outlined_text(self._title().upper(), self.app.fonts.get(48),
-                                     (255, 255, 255), [((14, 16, 40), 3)])
+                                     (255, 255, 255), TEXT_OUTLINE)
         surface.blit(title, title.get_rect(center=BANNER_RECT.center))
 
     def _draw_pedestal(self, surface):
@@ -167,36 +169,51 @@ class EndScreen(Screen):
         pygame.draw.ellipse(surface, (255, 255, 255), glow, 3)
 
     def _draw_stats_card(self, surface):
-        result, fonts = self._result, self.app.fonts
+        """La grande carte des scores : ruban, joueur, statistiques et record."""
         inner = draw_gold_frame(surface, CARD_RECT)
+        self._draw_ribbon(surface)
+        self._draw_player(surface, inner)
+        self._draw_stat_rows(surface, inner)
+        self._draw_record(surface, inner)
 
-        ribbon_text = self.app.t("end.victory" if result.won else "end.defeat")
-        ribbon_color = END_COLORS["win" if result.won else "lose"]
-        ribbon = render_outlined_text(ribbon_text.upper(), fonts.get(36), ribbon_color,
-                                      [((14, 16, 40), 3)])
-        ribbon_box = ribbon.get_rect(midbottom=(CARD_RECT.centerx, CARD_RECT.top + 18)).inflate(50, 12)
+    def _draw_ribbon(self, surface):
+        """Le ruban « VICTOIRE » ou « DÉFAITE » posé sur le haut de la carte."""
+        won = self._result.won
+        text = self.app.t("end.victory" if won else "end.defeat").upper()
+        ribbon = render_outlined_text(text, self.app.fonts.get(36),
+                                      END_COLORS["win" if won else "lose"], TEXT_OUTLINE)
+        anchor = (CARD_RECT.centerx, CARD_RECT.top + 18)
+        ribbon_box = ribbon.get_rect(midbottom=anchor).inflate(50, 12)
         draw_gold_frame(surface, ribbon_box)
         surface.blit(ribbon, ribbon.get_rect(center=ribbon_box.center))
 
-        name = render_gold_title(self.app.profile.pseudo or self.app.t("common.player"), fonts.get(40))
+    def _draw_player(self, surface, inner):
+        """Le pseudo, le niveau joué et un trait de séparation."""
+        fonts = self.app.fonts
+        pseudo = self.app.profile.pseudo or self.app.t("common.player")
+        name = render_gold_title(pseudo, fonts.get(40))
         surface.blit(name, name.get_rect(midleft=(inner.left + 26, inner.top + 58)))
-        level = self.app.t("level.title", name=self.app.t.level_name(result.difficulty))
+        level = self.app.t("level.title", name=self.app.t.level_name(self._result.difficulty))
         draw_text(surface, level.upper(), fonts.get(22), END_COLORS["stat_title"],
                   midleft=(inner.left + 28, inner.top + 96))
         pygame.draw.line(surface, GOLD["frame"], (inner.left + 20, inner.top + 120),
                          (inner.right - 20, inner.top + 120), 2)
 
+    def _draw_stat_rows(self, surface, inner):
+        """Une ligne par statistique : le titre à gauche, la valeur à droite."""
+        fonts = self.app.fonts
         for row, (label, value) in enumerate(self._stats()):
             y = inner.top + 165 + row * 72
             draw_text(surface, label.upper(), fonts.get(28), END_COLORS["stat_title"],
                       midleft=(inner.left + 28, y))
-            value_image = render_outlined_text(value, fonts.get(48), GOLD["text"],
-                                               [((14, 16, 40), 3)])
+            value_image = render_outlined_text(value, fonts.get(48), GOLD["text"], TEXT_OUTLINE)
             surface.blit(value_image, value_image.get_rect(midright=(inner.right - 28, y)))
 
-        if self._is_record and int(self._time * 2) % 2 == 0:      # clignote
-            draw_text(surface, self.app.t("end.new_record"), fonts.get(32), END_COLORS["win"],
-                      center=(inner.centerx, inner.bottom - 28))
+    def _draw_record(self, surface, inner):
+        """« Nouveau record ! » qui clignote en bas de la carte."""
+        if self._is_record and int(self._time * 2) % 2 == 0:
+            draw_text(surface, self.app.t("end.new_record"), self.app.fonts.get(32),
+                      END_COLORS["win"], center=(inner.centerx, inner.bottom - 28))
 
     def _stats(self) -> list:
         """Les lignes de la carte : (titre, valeur)."""
