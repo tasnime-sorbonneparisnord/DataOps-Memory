@@ -25,8 +25,8 @@ class PseudoScreen(MenuPage):
         self._text = app.profile.pseudo
         self._error = ""
         self._time = 0.0
-        self._validate_button = SectionButton(VALIDATE_RECT, app.t("pseudo.validate"), icon="menu_play.png",
-                                              title_size=30)
+        self._validate_button = SectionButton(VALIDATE_RECT, app.t("pseudo.validate"),
+                                              icon="menu_play.png", title_size=30)
 
     def handle_page_event(self, event):
         if event.type == pygame.TEXTINPUT:                 # lettre tapée (accents compris)

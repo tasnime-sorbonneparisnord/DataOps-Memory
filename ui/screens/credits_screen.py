@@ -27,8 +27,9 @@ class CreditsScreen(MenuPage):
                          (inner.right - 60, inner.top + 80), 2)
 
         y = inner.top + 125
+        frame_items = [self.app.t("credits.master"), self.app.t("credits.course")]
         sections = [(self.app.t("credits.team"), TEAM),
-                    (self.app.t("credits.frame"), [self.app.t("credits.master"), self.app.t("credits.course")])]
+                    (self.app.t("credits.frame"), frame_items)]
         for title, items in sections:
             heading = render_gold_title(title, fonts.get(32))
             surface.blit(heading, heading.get_rect(midleft=(inner.left + 60, y)))

@@ -57,7 +57,8 @@ def draw_player_bar(surface, topleft, fonts, pseudo, level_name):
     avatar = pygame.Rect(x, y, 88, 88)
     pygame.draw.rect(surface, HUD_COLORS["avatar_border"], avatar, border_radius=16)
     pygame.draw.rect(surface, HUD_COLORS["avatar"], avatar.inflate(-10, -10), border_radius=12)
-    draw_database_icon(surface, avatar.center, 42, HUD_COLORS["avatar_border"], HUD_COLORS["avatar"])
+    draw_database_icon(surface, avatar.center, 42,
+                       HUD_COLORS["avatar_border"], HUD_COLORS["avatar"])
 
     bar_left, bar_top, bar_width, bar_height = avatar.right - 6, y + 14, 330, 40
     bar = pygame.Surface((bar_width + 20, bar_height), pygame.SRCALPHA)
@@ -118,4 +119,5 @@ def draw_effect_badge(surface, center, fonts, icons, icon_file, text, count):
     pastille = (center[0] + 26, center[1] + 24)
     pygame.draw.circle(surface, HUD_COLORS["header"], pastille, 14)
     draw_text(surface, str(count), fonts.get(18), HUD_COLORS["bar_text"], center=pastille)
-    draw_text(surface, text, fonts.get(20), HUD_COLORS["header"], center=(center[0], center[1] + 52))
+    draw_text(surface, text, fonts.get(20), HUD_COLORS["header"],
+              center=(center[0], center[1] + 52))
