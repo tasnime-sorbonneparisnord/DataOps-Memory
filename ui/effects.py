@@ -1,4 +1,7 @@
-"""Animation quand une paire est trouvée : les deux cartes grossissent, brillent et lancent des étincelles."""
+"""Animation quand une paire est trouvée.
+
+Les deux cartes grossissent, brillent et lancent des étincelles.
+"""
 
 import math
 import random

@@ -21,9 +21,11 @@ class ScoresScreen(MenuPage):
         fonts = self.app.fonts
         columns = (inner.left + 80, inner.left + 390, inner.left + 590)
 
-        headers = (self.app.t("scores.level"), self.app.t("scores.time_left"), self.app.t("scores.attempts"))
+        header_keys = ("scores.level", "scores.time_left", "scores.attempts")
+        headers = [self.app.t(key) for key in header_keys]
         for x, header in zip(columns, headers):
-            draw_text(surface, header.upper(), fonts.get(22), GOLD["muted"], midleft=(x, inner.top + 45))
+            draw_text(surface, header.upper(), fonts.get(22), GOLD["muted"],
+                      midleft=(x, inner.top + 45))
         pygame.draw.line(surface, GOLD["frame"], (inner.left + 40, inner.top + 75),
                          (inner.right - 40, inner.top + 75), 2)
 

@@ -1,4 +1,7 @@
-"""Écran de jeu : la grille au centre, le temps, les essais et le record à gauche, la mission à droite."""
+"""Écran de jeu.
+
+La grille au centre, le temps, les essais et le record à gauche, la mission à droite.
+"""
 
 import math
 
@@ -26,7 +29,8 @@ RIGHT_X = 1032
 MISSION_RECT = pygame.Rect(RIGHT_X, 130, COLUMN_WIDTH, 250)
 BOARD_COLORS = {"frame": (58, 36, 92), "border": (130, 92, 190), "slot": (40, 26, 66)}
 BACKGROUND_VEIL = (20, 30, 70, 70)
-TOAST_CENTER_X, TOAST_TOP, TOAST_TEXT_WIDTH = 805, 14, 560   # message en haut, sans cacher les cartes
+# Message en haut de l'écran, sans cacher les cartes
+TOAST_CENTER_X, TOAST_TOP, TOAST_TEXT_WIDTH = 805, 14, 560
 
 
 def format_time(seconds: float) -> str:
