@@ -1,8 +1,8 @@
 
 import random
 
-from models.card import Card, PairCard
-from models.card_effect import SpecialCard
+from models.card import Card, PairCard, IncidentCard
+from models.special_card import SpecialCard
 
 
 class Board:
@@ -41,14 +41,6 @@ class Board:
         """Randomly shuffles the cards (pass a seeded rng for reproducible tests)."""
         (rng or random).shuffle(self.cards)
 
-    def get_card(self, card_id: str) -> Card:
-        """Returns a card using its ID."""
-        for card in self.cards:
-            if card.card_id == card_id:
-                return card
-
-        raise KeyError(f"No card found with ID: {card_id}")
-
     def get_card_at(self, index: int) -> Card:
         """Returns the card at a grid position (0 = top-left, row by row)."""
         if not isinstance(index, int) or isinstance(index, bool):
@@ -81,13 +73,12 @@ class Board:
         """Returns the number of incidents already resolved."""
         return sum(
             1 for card in self.get_pair_cards()
-            if card.is_matched() and card.get_pair_role() == "incident"
+            if card.is_matched() and isinstance(card, IncidentCard)
         )
 
     def is_complete(self) -> bool:
         """Checks whether all incident-solution pairs are matched."""
         pair_cards = self.get_pair_cards()
-
         return (
             len(pair_cards) > 0
             and all(card.is_matched() for card in pair_cards)

@@ -6,11 +6,8 @@ from models.card import (
     IncidentCard,
     SolutionCard,
 )
-from models.card_effect import (
-    CardEffect,
-    CoffeeCard,
-    CriticalCard,
-)
+from models.effect import CardEffect
+from models.special_card import CoffeeCard, CriticalCard
 from models.incident_pair import IncidentPair
 from models.board import Board
 
@@ -84,26 +81,6 @@ def test_special_card_rejects_zero_seconds():
 
 
 # INCIDENT PAIR TESTS
-
-def test_incident_pair_creation():
-    incident = IncidentCard("C1", "INC001", "Server down", "Description")
-    solution = SolutionCard("C2", "INC001", "Restart server", "Description")
-
-    pair = IncidentPair(incident, solution)
-
-    assert pair.pair_id == "INC001"
-    assert not pair.is_matched()
-
-
-def test_incident_pair_matching():
-    incident = IncidentCard("C1", "INC001", "Server down", "Description")
-    solution = SolutionCard("C2", "INC001", "Restart server", "Description")
-
-    pair = IncidentPair(incident, solution)
-    pair.mark_as_matched()
-
-    assert pair.is_matched()
-
 
 def test_incident_pair_rejects_different_ids():
     incident = IncidentCard("C1", "INC001", "Server down", "Description")

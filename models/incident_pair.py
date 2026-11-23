@@ -1,4 +1,3 @@
-
 from models.card import IncidentCard, SolutionCard
 
 
@@ -28,18 +27,6 @@ class IncidentPair:
     def pair_id(self) -> str:
         """Returns the identifier shared by both cards."""
         return self.incident.pair_id
-
-    def is_matched(self) -> bool:
-        """Checks whether both cards have been matched."""
-        return (
-            self.incident.is_matched()
-            and self.solution.is_matched()
-        )
-
-    def mark_as_matched(self):
-        """Marks both cards as successfully matched."""
-        self.incident.mark_as_matched()
-        self.solution.mark_as_matched()
 
     def get_cards(self) -> tuple:
         """Returns the two cards forming the pair."""
