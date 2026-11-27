@@ -672,12 +672,18 @@ For further details, see [`scala/README.md`](scala/README.md).
 
 ## 12. Assets and Credits
 
-| Asset | Source | Licence |
+| Resource | Source | License |
 |---|---|---|
-| Icons | Lucide, converted to PNG (see `assets/icons/SOURCES.md`) | ISC |
-| Font | Luckiest Guy – Google Fonts | Apache 2.0 |
-| Characters, backgrounds, logo and cinematic frames | Generated with Gemini for this project and integrated by the team | — |
-| Music and sound effects | Generated specifically for this project (see `assets/sounds/SOURCES.md`) | — |
+| Characters and backgrounds | Drawn in Krita for this project | Created by the team |
+| Logo | Designed in Adobe Illustrator for this project | Created by the team |
+| Screen mockups | Designed in Figma (design stage only, not included in the game) | Created by the team |
+| Intro video | Generated with Gemini (Veo), then split into frames with ffmpeg | — |
+| Icons | [Lucide](https://lucide.dev), see `assets/icons/SOURCES.md` | ISC |
+| Font | Luckiest Guy, [Google Fonts](https://fonts.google.com/specimen/Luckiest+Guy) | Apache 2.0 |
+| Music and sound effects | Generated with code (Python, NumPy) for this project, see `assets/sounds/SOURCES.md` | No third-party rights |
+
+All assets are stored in `assets/` and are separate from the code: they can be replaced
+without changing any Python file, as long as the file names and formats stay the same.
 
 ## 13. Project Objectives
 
